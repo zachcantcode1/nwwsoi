@@ -1,0 +1,443 @@
+2025-05-24 15:52:05,844 - api_server - INFO - Starting Flask server...
+2025-05-24 15:52:05,861 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5005
+2025-05-24 15:52:05,861 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-05-24 15:52:10,276 - api_server - INFO - Received request to /generate_map endpoint
+2025-05-24 15:52:10,276 - api_server - INFO - Processing warning with ID: test130
+2025-05-24 15:52:10,276 - api_server - INFO - Created MapService instance
+2025-05-24 15:52:10,276 - map_service - INFO - [DEBUG] warning_id: test130, sanitized_id: test130
+2025-05-24 15:52:10,276 - map_service - INFO - [DEBUG] html_path: /Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test130.html
+2025-05-24 15:52:10,287 - map_service - INFO - [DEBUG] Created HTML file at: /Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test130.html
+2025-05-24 15:52:10,287 - map_service - INFO - [DEBUG] Converting HTML to image with Playwright: file:///Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test130.html → /Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test130.png
+2025-05-24 15:52:10,287 - asyncio - DEBUG - Using selector: KqueueSelector
+2025-05-24 15:52:10,505 - map_service - INFO - Loading URL: file:///Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test130.html
+2025-05-24 15:52:10,693 - map_service - INFO - Browser console: Error initializing maps: SyntaxError: Expected property name or '}' in JSON at position 1 (line 1 column 2)
+    at JSON.parse (<anonymous>)
+    at initMaps (file:///Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test130.html:146:37)
+    at HTMLDocument.<anonymous> (file:///Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test130.html:254:5)
+2025-05-24 15:52:11,187 - map_service - INFO - Waiting for map to initialize...
+2025-05-24 15:52:11,200 - map_service - INFO - Updating map size...
+2025-05-24 15:52:11,201 - map_service - INFO - Waiting for map tiles to load...
+2025-05-24 15:52:21,204 - map_service - WARNING - Did not detect loaded tiles: Page.wait_for_selector: Timeout 10000ms exceeded.
+Call log:
+  - waiting for locator(".leaflet-tile-loaded") to be visible
+
+2025-05-24 15:52:24,209 - map_service - INFO - Taking screenshot...
+2025-05-24 15:52:24,293 - map_service - INFO - Successfully created screenshot: /Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test130.png
+2025-05-24 15:52:24,293 - map_service - INFO - [SUCCESS] Screenshot saved to: /Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test130.png
+2025-05-24 15:52:24,314 - map_service - INFO - [SUCCESS] Successfully generated map image at: /Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test130.png
+2025-05-24 15:52:24,314 - api_server - INFO - Map generation completed. Image path: /Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test130.png
+2025-05-24 15:52:24,314 - api_server - INFO - Image file exists. Size: 50431 bytes
+2025-05-24 15:52:24,314 - werkzeug - INFO - 127.0.0.1 - - [24/May/2025 15:52:24] "POST /generate_map HTTP/1.1" 200 -
+2025-05-24 15:53:36,532 - api_server - INFO - Starting Flask server...
+2025-05-24 15:53:36,549 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5005
+2025-05-24 15:53:36,549 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-05-24 15:53:42,855 - api_server - INFO - Received request to /generate_map endpoint
+2025-05-24 15:53:42,855 - api_server - INFO - Processing warning with ID: test131
+2025-05-24 15:53:42,855 - api_server - INFO - Created MapService instance
+2025-05-24 15:53:42,855 - map_service - INFO - [DEBUG] warning_id: test131, sanitized_id: test131
+2025-05-24 15:53:42,855 - map_service - INFO - [DEBUG] html_path: /Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test131.html
+2025-05-24 15:53:42,866 - map_service - INFO - [DEBUG] Created HTML file at: /Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test131.html
+2025-05-24 15:53:42,866 - map_service - INFO - [DEBUG] Converting HTML to image with Playwright: file:///Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test131.html → /Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test131.png
+2025-05-24 15:53:42,866 - asyncio - DEBUG - Using selector: KqueueSelector
+2025-05-24 15:53:43,084 - map_service - INFO - Loading URL: file:///Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test131.html
+2025-05-24 15:53:43,415 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 15:53:43,417 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 15:53:43,417 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 15:53:43,417 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 15:53:43,417 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 15:53:43,418 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 15:53:43,418 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 15:53:43,433 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 15:53:43,765 - map_service - INFO - Browser console: Maps initialized successfully
+2025-05-24 15:53:43,934 - map_service - INFO - Waiting for map to initialize...
+2025-05-24 15:53:43,948 - map_service - INFO - Updating map size...
+2025-05-24 15:53:43,949 - map_service - INFO - Waiting for map tiles to load...
+2025-05-24 15:53:46,966 - map_service - INFO - Taking screenshot...
+2025-05-24 15:53:47,037 - map_service - INFO - Successfully created screenshot: /Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test131.png
+2025-05-24 15:53:47,037 - map_service - INFO - [SUCCESS] Screenshot saved to: /Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test131.png
+2025-05-24 15:53:47,058 - map_service - INFO - [SUCCESS] Successfully generated map image at: /Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test131.png
+2025-05-24 15:53:47,058 - api_server - INFO - Map generation completed. Image path: /Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test131.png
+2025-05-24 15:53:47,058 - api_server - INFO - Image file exists. Size: 54197 bytes
+2025-05-24 15:53:47,059 - werkzeug - INFO - 127.0.0.1 - - [24/May/2025 15:53:47] "POST /generate_map HTTP/1.1" 200 -
+2025-05-24 15:56:18,741 - api_server - INFO - Starting Flask server...
+2025-05-24 15:56:18,763 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5005
+2025-05-24 15:56:18,763 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-05-24 15:56:25,663 - api_server - INFO - Received request to /generate_map endpoint
+2025-05-24 15:56:25,663 - api_server - INFO - Processing warning with ID: test132
+2025-05-24 15:56:25,663 - api_server - INFO - Created MapService instance
+2025-05-24 15:56:25,663 - map_service - INFO - [DEBUG] warning_id: test132, sanitized_id: test132
+2025-05-24 15:56:25,663 - map_service - INFO - [DEBUG] html_path: /Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test132.html
+2025-05-24 15:56:25,674 - map_service - INFO - [DEBUG] Created HTML file at: /Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test132.html
+2025-05-24 15:56:25,674 - map_service - INFO - [DEBUG] Converting HTML to image with Playwright: file:///Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test132.html → /Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test132.png
+2025-05-24 15:56:25,674 - asyncio - DEBUG - Using selector: KqueueSelector
+2025-05-24 15:56:26,112 - map_service - INFO - Loading URL: file:///Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test132.html
+2025-05-24 15:56:26,488 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 15:56:26,490 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 15:56:26,490 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 15:56:26,494 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 15:56:26,499 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 15:56:26,507 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 15:56:26,526 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 15:56:26,531 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 15:56:26,531 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 15:56:26,531 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 15:56:26,532 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 15:56:26,534 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 15:56:26,535 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 15:56:26,535 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 15:56:26,566 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 15:56:26,566 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 15:56:26,839 - map_service - INFO - Browser console: Maps initialized successfully
+2025-05-24 15:56:27,067 - map_service - INFO - Waiting for map to initialize...
+2025-05-24 15:56:27,081 - map_service - INFO - Updating map size...
+2025-05-24 15:56:27,083 - map_service - INFO - Waiting for map tiles to load...
+2025-05-24 15:56:30,102 - map_service - INFO - Taking screenshot...
+2025-05-24 15:56:30,177 - map_service - INFO - Successfully created screenshot: /Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test132.png
+2025-05-24 15:56:30,177 - map_service - INFO - [SUCCESS] Screenshot saved to: /Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test132.png
+2025-05-24 15:56:30,211 - map_service - INFO - [SUCCESS] Successfully generated map image at: /Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test132.png
+2025-05-24 15:56:30,211 - api_server - INFO - Map generation completed. Image path: /Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test132.png
+2025-05-24 15:56:30,211 - api_server - INFO - Image file exists. Size: 412937 bytes
+2025-05-24 15:56:30,212 - werkzeug - INFO - 127.0.0.1 - - [24/May/2025 15:56:30] "POST /generate_map HTTP/1.1" 200 -
+2025-05-24 16:00:56,541 - api_server - INFO - Starting Flask server...
+2025-05-24 16:00:56,558 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5005
+2025-05-24 16:00:56,558 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-05-24 16:01:01,839 - api_server - INFO - Received request to /generate_map endpoint
+2025-05-24 16:01:01,839 - api_server - INFO - Processing warning with ID: test133
+2025-05-24 16:01:01,839 - api_server - INFO - Created MapService instance
+2025-05-24 16:01:01,839 - map_service - INFO - [DEBUG] warning_id: test133, sanitized_id: test133
+2025-05-24 16:01:01,839 - map_service - INFO - [DEBUG] html_path: /Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test133.html
+2025-05-24 16:01:01,850 - map_service - INFO - [DEBUG] Created HTML file at: /Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test133.html
+2025-05-24 16:01:01,850 - map_service - INFO - [DEBUG] Converting HTML to image with Playwright: file:///Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test133.html → /Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test133.png
+2025-05-24 16:01:01,850 - asyncio - DEBUG - Using selector: KqueueSelector
+2025-05-24 16:01:02,071 - map_service - INFO - Loading URL: file:///Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test133.html
+2025-05-24 16:01:02,485 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:01:02,488 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:01:02,493 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:01:02,496 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:01:02,504 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:01:02,518 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:01:02,518 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:01:02,518 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:01:02,518 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:01:02,519 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:01:02,519 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:01:02,520 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:01:02,521 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:01:02,521 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:01:02,521 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:01:02,528 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:01:02,817 - map_service - INFO - Browser console: Maps initialized successfully
+2025-05-24 16:01:03,029 - map_service - INFO - Waiting for map to initialize...
+2025-05-24 16:01:03,039 - map_service - INFO - Updating map size...
+2025-05-24 16:01:03,040 - map_service - INFO - Waiting for map tiles to load...
+2025-05-24 16:01:06,054 - map_service - INFO - Taking screenshot...
+2025-05-24 16:01:06,156 - map_service - INFO - Successfully created screenshot: /Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test133.png
+2025-05-24 16:01:06,156 - map_service - INFO - [SUCCESS] Screenshot saved to: /Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test133.png
+2025-05-24 16:01:06,175 - map_service - INFO - [SUCCESS] Successfully generated map image at: /Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test133.png
+2025-05-24 16:01:06,175 - api_server - INFO - Map generation completed. Image path: /Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test133.png
+2025-05-24 16:01:06,175 - api_server - INFO - Image file exists. Size: 392822 bytes
+2025-05-24 16:01:06,176 - werkzeug - INFO - 127.0.0.1 - - [24/May/2025 16:01:06] "POST /generate_map HTTP/1.1" 200 -
+2025-05-24 16:03:43,437 - api_server - INFO - Starting Flask server...
+2025-05-24 16:03:43,453 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5005
+2025-05-24 16:03:43,453 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-05-24 16:03:51,732 - api_server - INFO - Received request to /generate_map endpoint
+2025-05-24 16:03:51,732 - api_server - INFO - Processing warning with ID: test134
+2025-05-24 16:03:51,732 - api_server - INFO - Created MapService instance
+2025-05-24 16:03:51,732 - map_service - INFO - [DEBUG] warning_id: test134, sanitized_id: test134
+2025-05-24 16:03:51,732 - map_service - INFO - [DEBUG] html_path: /Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test134.html
+2025-05-24 16:03:51,743 - map_service - INFO - [DEBUG] Created HTML file at: /Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test134.html
+2025-05-24 16:03:51,743 - map_service - INFO - [DEBUG] Converting HTML to image with Playwright: file:///Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test134.html → /Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test134.png
+2025-05-24 16:03:51,743 - asyncio - DEBUG - Using selector: KqueueSelector
+2025-05-24 16:03:51,964 - map_service - INFO - Loading URL: file:///Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test134.html
+2025-05-24 16:03:52,333 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:03:52,334 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:03:52,342 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:03:52,351 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:03:52,373 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:03:52,378 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:03:52,378 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:03:52,379 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:03:52,380 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:03:52,380 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:03:52,380 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:03:52,380 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:03:52,388 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:03:52,421 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:03:52,421 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:03:52,421 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:03:52,655 - map_service - INFO - Browser console: Maps initialized successfully
+2025-05-24 16:03:52,922 - map_service - INFO - Waiting for map to initialize...
+2025-05-24 16:03:52,934 - map_service - INFO - Updating map size...
+2025-05-24 16:03:52,936 - map_service - INFO - Waiting for map tiles to load...
+2025-05-24 16:03:55,952 - map_service - INFO - Taking screenshot...
+2025-05-24 16:03:56,056 - map_service - INFO - Successfully created screenshot: /Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test134.png
+2025-05-24 16:03:56,056 - map_service - INFO - [SUCCESS] Screenshot saved to: /Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test134.png
+2025-05-24 16:03:56,076 - map_service - INFO - [SUCCESS] Successfully generated map image at: /Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test134.png
+2025-05-24 16:03:56,076 - api_server - INFO - Map generation completed. Image path: /Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test134.png
+2025-05-24 16:03:56,076 - api_server - INFO - Image file exists. Size: 405810 bytes
+2025-05-24 16:03:56,076 - werkzeug - INFO - 127.0.0.1 - - [24/May/2025 16:03:56] "POST /generate_map HTTP/1.1" 200 -
+2025-05-24 16:06:14,402 - api_server - INFO - Starting Flask server...
+2025-05-24 16:06:14,418 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5005
+2025-05-24 16:06:14,418 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-05-24 16:06:19,288 - api_server - INFO - Received request to /generate_map endpoint
+2025-05-24 16:06:19,288 - api_server - INFO - Processing warning with ID: test135
+2025-05-24 16:06:19,288 - api_server - INFO - Created MapService instance
+2025-05-24 16:06:19,288 - map_service - INFO - [DEBUG] warning_id: test135, sanitized_id: test135
+2025-05-24 16:06:19,288 - map_service - INFO - [DEBUG] html_path: /Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test135.html
+2025-05-24 16:06:19,299 - map_service - INFO - [DEBUG] Created HTML file at: /Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test135.html
+2025-05-24 16:06:19,300 - map_service - INFO - [DEBUG] Converting HTML to image with Playwright: file:///Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test135.html → /Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test135.png
+2025-05-24 16:06:19,300 - asyncio - DEBUG - Using selector: KqueueSelector
+2025-05-24 16:06:19,545 - map_service - INFO - Loading URL: file:///Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test135.html
+2025-05-24 16:06:19,942 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:06:19,943 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:06:19,943 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:06:19,947 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:06:19,952 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:06:19,957 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:06:19,967 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:06:19,978 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:06:19,979 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:06:19,984 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:06:19,984 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:06:19,985 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:06:19,990 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:06:19,990 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:06:19,990 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:06:19,994 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:06:20,246 - map_service - INFO - Browser console: Maps initialized successfully
+2025-05-24 16:06:20,495 - map_service - INFO - Waiting for map to initialize...
+2025-05-24 16:06:20,509 - map_service - INFO - Updating map size...
+2025-05-24 16:06:20,511 - map_service - INFO - Waiting for map tiles to load...
+2025-05-24 16:06:23,528 - map_service - INFO - Taking screenshot...
+2025-05-24 16:06:23,614 - map_service - INFO - Successfully created screenshot: /Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test135.png
+2025-05-24 16:06:23,614 - map_service - INFO - [SUCCESS] Screenshot saved to: /Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test135.png
+2025-05-24 16:06:23,635 - map_service - INFO - [SUCCESS] Successfully generated map image at: /Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test135.png
+2025-05-24 16:06:23,635 - api_server - INFO - Map generation completed. Image path: /Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test135.png
+2025-05-24 16:06:23,635 - api_server - INFO - Image file exists. Size: 392813 bytes
+2025-05-24 16:06:23,635 - werkzeug - INFO - 127.0.0.1 - - [24/May/2025 16:06:23] "POST /generate_map HTTP/1.1" 200 -
+2025-05-24 16:08:38,835 - api_server - INFO - Starting Flask server...
+2025-05-24 16:08:38,852 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5005
+2025-05-24 16:08:38,852 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-05-24 16:08:47,716 - api_server - INFO - Received request to /generate_map endpoint
+2025-05-24 16:08:47,716 - api_server - INFO - Processing warning with ID: test136
+2025-05-24 16:08:47,716 - api_server - INFO - Created MapService instance
+2025-05-24 16:08:47,716 - map_service - INFO - [DEBUG] warning_id: test136, sanitized_id: test136
+2025-05-24 16:08:47,716 - map_service - INFO - [DEBUG] html_path: /Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test136.html
+2025-05-24 16:08:47,726 - map_service - INFO - [DEBUG] Created HTML file at: /Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test136.html
+2025-05-24 16:08:47,726 - map_service - INFO - [DEBUG] Converting HTML to image with Playwright: file:///Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test136.html → /Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test136.png
+2025-05-24 16:08:47,726 - asyncio - DEBUG - Using selector: KqueueSelector
+2025-05-24 16:08:47,945 - map_service - INFO - Loading URL: file:///Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test136.html
+2025-05-24 16:08:48,303 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:08:48,318 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:08:48,318 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:08:48,321 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:08:48,322 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:08:48,322 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:08:48,329 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:08:48,330 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:08:48,334 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:08:48,334 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:08:48,336 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:08:48,337 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:08:48,337 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:08:48,337 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:08:48,340 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:08:48,343 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:08:48,630 - map_service - INFO - Browser console: Maps initialized successfully
+2025-05-24 16:08:48,844 - map_service - INFO - Waiting for map to initialize...
+2025-05-24 16:08:48,852 - map_service - INFO - Updating map size...
+2025-05-24 16:08:48,853 - map_service - INFO - Waiting for map tiles to load...
+2025-05-24 16:08:51,867 - map_service - INFO - Taking screenshot...
+2025-05-24 16:08:51,960 - map_service - INFO - Successfully created screenshot: /Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test136.png
+2025-05-24 16:08:51,960 - map_service - INFO - [SUCCESS] Screenshot saved to: /Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test136.png
+2025-05-24 16:08:51,979 - map_service - INFO - [SUCCESS] Successfully generated map image at: /Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test136.png
+2025-05-24 16:08:51,979 - api_server - INFO - Map generation completed. Image path: /Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test136.png
+2025-05-24 16:08:51,980 - api_server - INFO - Image file exists. Size: 392808 bytes
+2025-05-24 16:08:51,980 - werkzeug - INFO - 127.0.0.1 - - [24/May/2025 16:08:51] "POST /generate_map HTTP/1.1" 200 -
+2025-05-24 16:21:17,548 - api_server - INFO - Starting Flask server...
+2025-05-24 16:21:17,571 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5005
+2025-05-24 16:21:17,571 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-05-24 16:21:29,424 - api_server - INFO - Received request to /generate_map endpoint
+2025-05-24 16:21:29,424 - api_server - INFO - Processing warning with ID: test137
+2025-05-24 16:21:29,424 - api_server - INFO - Created MapService instance
+2025-05-24 16:21:29,424 - map_service - INFO - [DEBUG] warning_id: test137, sanitized_id: test137
+2025-05-24 16:21:29,424 - map_service - INFO - [DEBUG] html_path: /Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test137.html
+2025-05-24 16:21:29,433 - map_service - INFO - [DEBUG] Created HTML file at: /Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test137.html
+2025-05-24 16:21:29,433 - map_service - INFO - [DEBUG] Converting HTML to image with Playwright: file:///Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test137.html → /Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test137.png
+2025-05-24 16:21:29,434 - asyncio - DEBUG - Using selector: KqueueSelector
+2025-05-24 16:21:29,965 - map_service - INFO - Loading URL: file:///Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test137.html
+2025-05-24 16:21:30,202 - map_service - INFO - Browser console: Polygon data: [Array(2), Array(2), Array(2), Array(2), Array(2)]
+2025-05-24 16:21:30,202 - map_service - INFO - Browser console: Map center: [-89.6, 40.4]
+2025-05-24 16:21:30,314 - map_service - INFO - Browser console: Updating inset map...
+2025-05-24 16:21:30,314 - map_service - INFO - Browser console: Inset polygon bounds: s
+2025-05-24 16:21:30,315 - map_service - INFO - Browser console: Fit bounds success
+2025-05-24 16:21:30,426 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:21:30,428 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:21:30,428 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:21:30,428 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:21:30,428 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:21:30,428 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:21:30,438 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:21:30,438 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:21:30,474 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:21:30,474 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:21:30,484 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:21:30,484 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:21:30,495 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:21:30,506 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:21:30,511 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:21:30,522 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:21:30,714 - map_service - INFO - Browser console: Updating inset map...
+2025-05-24 16:21:30,714 - map_service - INFO - Browser console: Inset polygon bounds: s
+2025-05-24 16:21:30,714 - map_service - INFO - Browser console: Fit bounds success
+2025-05-24 16:21:31,050 - map_service - INFO - Waiting for map to initialize...
+2025-05-24 16:21:31,073 - map_service - INFO - Updating map size...
+2025-05-24 16:21:31,076 - map_service - INFO - Waiting for map tiles to load...
+2025-05-24 16:21:34,098 - map_service - INFO - Taking screenshot...
+2025-05-24 16:21:34,102 - map_service - INFO - Browser console: Final redraw...
+2025-05-24 16:21:34,102 - map_service - INFO - Browser console: Maps initialized successfully
+2025-05-24 16:21:34,117 - map_service - INFO - Browser console: Updating inset map...
+2025-05-24 16:21:34,117 - map_service - INFO - Browser console: Inset polygon bounds: s
+2025-05-24 16:21:34,117 - map_service - INFO - Browser console: Fit bounds success
+2025-05-24 16:21:34,126 - map_service - INFO - Browser console: Updating inset map...
+2025-05-24 16:21:34,126 - map_service - INFO - Browser console: Inset polygon bounds: s
+2025-05-24 16:21:34,126 - map_service - INFO - Browser console: Fit bounds success
+2025-05-24 16:21:34,191 - map_service - INFO - Successfully created screenshot: /Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test137.png
+2025-05-24 16:21:34,191 - map_service - INFO - [SUCCESS] Screenshot saved to: /Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test137.png
+2025-05-24 16:21:34,213 - map_service - INFO - [SUCCESS] Successfully generated map image at: /Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test137.png
+2025-05-24 16:21:34,213 - api_server - INFO - Map generation completed. Image path: /Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test137.png
+2025-05-24 16:21:34,213 - api_server - INFO - Image file exists. Size: 439262 bytes
+2025-05-24 16:21:34,213 - werkzeug - INFO - 127.0.0.1 - - [24/May/2025 16:21:34] "POST /generate_map HTTP/1.1" 200 -
+2025-05-24 16:24:19,921 - api_server - INFO - Starting Flask server...
+2025-05-24 16:24:19,942 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5005
+2025-05-24 16:24:19,942 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-05-24 16:27:41,317 - api_server - INFO - Starting Flask server...
+2025-05-24 16:27:41,345 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5005
+2025-05-24 16:27:41,345 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-05-24 16:28:19,203 - api_server - INFO - Received request to /generate_map endpoint
+2025-05-24 16:28:19,203 - api_server - INFO - Processing warning with ID: test138
+2025-05-24 16:28:19,203 - api_server - INFO - Created MapService instance
+2025-05-24 16:28:19,203 - map_service - INFO - [DEBUG] warning_id: test138, sanitized_id: test138
+2025-05-24 16:28:19,203 - map_service - INFO - [DEBUG] html_path: /Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test138.html
+2025-05-24 16:28:19,216 - map_service - INFO - [DEBUG] Created HTML file at: /Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test138.html
+2025-05-24 16:28:19,216 - map_service - INFO - [DEBUG] Converting HTML to image with Playwright: file:///Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test138.html → /Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test138.png
+2025-05-24 16:28:19,216 - asyncio - DEBUG - Using selector: KqueueSelector
+2025-05-24 16:28:19,856 - map_service - INFO - Loading URL: file:///Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test138.html
+2025-05-24 16:28:19,882 - api_server - INFO - Received request to /generate_map endpoint
+2025-05-24 16:28:19,882 - api_server - INFO - Processing warning with ID: test138
+2025-05-24 16:28:19,882 - api_server - INFO - Created MapService instance
+2025-05-24 16:28:19,882 - map_service - INFO - [DEBUG] warning_id: test138, sanitized_id: test138
+2025-05-24 16:28:19,882 - map_service - INFO - [DEBUG] html_path: /Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test138.html
+2025-05-24 16:28:19,883 - map_service - INFO - [DEBUG] Created HTML file at: /Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test138.html
+2025-05-24 16:28:19,883 - map_service - INFO - [DEBUG] Converting HTML to image with Playwright: file:///Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test138.html → /Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test138.png
+2025-05-24 16:28:19,883 - asyncio - DEBUG - Using selector: KqueueSelector
+2025-05-24 16:28:20,117 - map_service - INFO - Browser console: Polygon data: [Array(2), Array(2), Array(2), Array(2), Array(2)]
+2025-05-24 16:28:20,117 - map_service - INFO - Browser console: Map center: [-89.6, 40.4]
+2025-05-24 16:28:20,119 - map_service - INFO - Loading URL: file:///Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test138.html
+2025-05-24 16:28:20,236 - map_service - INFO - Browser console: Updating inset map...
+2025-05-24 16:28:20,236 - map_service - INFO - Browser console: Inset polygon bounds: s
+2025-05-24 16:28:20,236 - map_service - INFO - Browser console: Fit bounds success
+2025-05-24 16:28:20,278 - map_service - INFO - Browser console: Polygon data: [Array(2), Array(2), Array(2), Array(2), Array(2)]
+2025-05-24 16:28:20,278 - map_service - INFO - Browser console: Map center: [-89.6, 40.4]
+2025-05-24 16:28:20,385 - map_service - INFO - Browser console: Updating inset map...
+2025-05-24 16:28:20,385 - map_service - INFO - Browser console: Inset polygon bounds: s
+2025-05-24 16:28:20,386 - map_service - INFO - Browser console: Fit bounds success
+2025-05-24 16:28:20,637 - map_service - INFO - Browser console: Updating inset map...
+2025-05-24 16:28:20,637 - map_service - INFO - Browser console: Inset polygon bounds: s
+2025-05-24 16:28:20,637 - map_service - INFO - Browser console: Fit bounds success
+2025-05-24 16:28:20,785 - map_service - INFO - Browser console: Updating inset map...
+2025-05-24 16:28:20,785 - map_service - INFO - Browser console: Inset polygon bounds: s
+2025-05-24 16:28:20,785 - map_service - INFO - Browser console: Fit bounds success
+2025-05-24 16:28:21,137 - map_service - INFO - Browser console: Final redraw...
+2025-05-24 16:28:21,138 - map_service - INFO - Browser console: Maps initialized successfully
+2025-05-24 16:28:21,285 - map_service - INFO - Browser console: Final redraw...
+2025-05-24 16:28:21,285 - map_service - INFO - Browser console: Maps initialized successfully
+2025-05-24 16:28:21,363 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:28:21,363 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:28:21,364 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:28:21,364 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:28:21,365 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:28:21,371 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:28:21,371 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:28:21,375 - map_service - INFO - Browser console: Tile loaded: p
+2025-05-24 16:28:21,872 - map_service - INFO - Waiting for map to initialize...
+2025-05-24 16:28:21,876 - map_service - INFO - Waiting for map to initialize...
+2025-05-24 16:28:21,893 - map_service - INFO - Updating map size...
+2025-05-24 16:28:21,894 - map_service - INFO - Updating map size...
+2025-05-24 16:28:21,897 - map_service - INFO - Waiting for map tiles to load...
+2025-05-24 16:28:21,897 - map_service - INFO - Waiting for map tiles to load...
+2025-05-24 16:28:24,917 - map_service - INFO - Taking screenshot...
+2025-05-24 16:28:24,917 - map_service - INFO - Taking screenshot...
+2025-05-24 16:28:24,942 - map_service - INFO - Browser console: Updating inset map...
+2025-05-24 16:28:24,947 - map_service - INFO - Browser console: Updating inset map...
+2025-05-24 16:28:24,948 - map_service - INFO - Browser console: Inset polygon bounds: s
+2025-05-24 16:28:24,948 - map_service - INFO - Browser console: Inset polygon bounds: s
+2025-05-24 16:28:24,948 - map_service - INFO - Browser console: Fit bounds success
+2025-05-24 16:28:24,948 - map_service - INFO - Browser console: Fit bounds success
+2025-05-24 16:28:24,949 - map_service - INFO - Browser console: Updating inset map...
+2025-05-24 16:28:24,949 - map_service - INFO - Browser console: Updating inset map...
+2025-05-24 16:28:24,949 - map_service - INFO - Browser console: Inset polygon bounds: s
+2025-05-24 16:28:24,949 - map_service - INFO - Browser console: Inset polygon bounds: s
+2025-05-24 16:28:24,949 - map_service - INFO - Browser console: Fit bounds success
+2025-05-24 16:28:24,949 - map_service - INFO - Browser console: Fit bounds success
+2025-05-24 16:28:24,999 - map_service - INFO - Successfully created screenshot: /Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test138.png
+2025-05-24 16:28:24,999 - map_service - INFO - Successfully created screenshot: /Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test138.png
+2025-05-24 16:28:24,999 - map_service - INFO - [SUCCESS] Screenshot saved to: /Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test138.png
+2025-05-24 16:28:24,999 - map_service - INFO - [SUCCESS] Screenshot saved to: /Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test138.png
+2025-05-24 16:28:25,026 - map_service - INFO - [SUCCESS] Successfully generated map image at: /Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test138.png
+2025-05-24 16:28:25,026 - api_server - INFO - Map generation completed. Image path: /Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test138.png
+2025-05-24 16:28:25,026 - api_server - INFO - Image file exists. Size: 80836 bytes
+2025-05-24 16:28:25,027 - werkzeug - INFO - 127.0.0.1 - - [24/May/2025 16:28:25] "POST /generate_map HTTP/1.1" 200 -
+2025-05-24 16:28:25,027 - map_service - INFO - [SUCCESS] Successfully generated map image at: /Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test138.png
+2025-05-24 16:28:25,027 - api_server - INFO - Map generation completed. Image path: /Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test138.png
+2025-05-24 16:28:25,027 - api_server - INFO - Image file exists. Size: 80836 bytes
+2025-05-24 16:28:25,027 - werkzeug - INFO - 127.0.0.1 - - [24/May/2025 16:28:25] "POST /generate_map HTTP/1.1" 200 -
+2025-05-24 16:39:12,171 - api_server - INFO - Starting Flask server...
+2025-05-24 16:39:12,177 - api_server - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5005
+ * Running on http://192.168.1.187:5005
+2025-05-24 16:39:12,177 - api_server - INFO - [33mPress CTRL+C to quit[0m
+2025-05-24 16:39:26,569 - api_server - INFO - Received warning: test123
+2025-05-24 16:39:26,570 - api_server - INFO - Offsetting map center up by 0.020000000000000285 degrees
+2025-05-24 16:39:26,570 - api_server - INFO - Centering map on adjusted centroid: Lat=37.22244897959183, Lon=-93.24933333333334
+2025-05-24 16:39:28,579 - api_server - ERROR - Error getting nearby counties: module 'fiona' has no attribute 'path'
+2025-05-24 16:39:28,602 - api_server - INFO - Created warning map HTML: /Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test123.html
+2025-05-24 16:39:28,602 - api_server - INFO - Converting HTML to image: /Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test123.html → /Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test123.png
+2025-05-24 16:39:30,517 - api_server - INFO - Waiting up to 15 seconds for map to load (waiting for #map-load-complete)...
+2025-05-24 16:39:30,522 - api_server - INFO - #map-load-complete element found. Map should be loaded.
+2025-05-24 16:39:33,774 - api_server - INFO - High-resolution screenshot saved to: /Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test123.png
+2025-05-24 16:39:33,844 - api_server - INFO - Cleaned up HTML file: /Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test123.html
+2025-05-24 16:39:33,844 - api_server - INFO - Converting HTML to image: /Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test123.png → /Users/zacharymiller/code/nwwsoi/weather_alerts/output/warning_test123.png
+2025-05-24 16:39:34,762 - api_server - INFO - Waiting up to 15 seconds for map to load (waiting for #map-load-complete)...
+2025-05-24 16:39:50,134 - api_server - ERROR - Selenium WebDriverException: Message: 
+Stacktrace:
+0   chromedriver                        0x0000000100a103e0 cxxbridge1$str$ptr + 2829900
+1   chromedriver                        0x0000000100a086a8 cxxbridge1$str$ptr + 2797844
+2   chromedriver                        0x0000000100545fbc cxxbridge1$string$len + 90140
+3   chromedriver                        0x000000010058d1bc cxxbridge1$string$len + 381468
+4   chromedriver                        0x00000001005ce044 cxxbridge1$string$len + 647332
+5   chromedriver                        0x00000001005813f8 cxxbridge1$string$len + 332888
+6   chromedriver                        0x00000001009d4804 cxxbridge1$str$ptr + 2585200
+7   chromedriver                        0x00000001009d7ad4 cxxbridge1$str$ptr + 2598208
+8   chromedriver                        0x00000001009b5dd8 cxxbridge1$str$ptr + 2459716
+9   chromedriver                        0x00000001009d834c cxxbridge1$str$ptr + 2600376
+10  chromedriver                        0x00000001009a7664 cxxbridge1$str$ptr + 2400464
+11  chromedriver                        0x00000001009f82b0 cxxbridge1$str$ptr + 2731292
+12  chromedriver                        0x00000001009f843c cxxbridge1$str$ptr + 2731688
+13  chromedriver                        0x0000000100a082f4 cxxbridge1$str$ptr + 2796896
+14  libsystem_pthread.dylib             0x000000018ccadc0c _pthread_start + 136
+15  libsystem_pthread.dylib             0x000000018cca8b80 thread_start + 8
+
+2025-05-24 16:39:50,135 - api_server - INFO - Generated image at: 
+2025-05-24 16:39:50,135 - api_server - INFO - 127.0.0.1 - - [24/May/2025 16:39:50] "POST /generate_map HTTP/1.1" 200 -

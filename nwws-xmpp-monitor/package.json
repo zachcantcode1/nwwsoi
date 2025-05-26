@@ -1,0 +1,21 @@
+{
+  "name": "nwws-xmpp-monitor",
+  "version": "1.0.0",
+  "description": "A project to monitor the NWWS OI XMPP server and parse alerts and storm reports.",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "dependencies": {
+    "@xmpp/client": "^0.7.3",
+    "axios": "^0.21.1",
+    "dotenv": "^10.0.0",
+    "form-data": "^4.0.2"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.7"
+  },
+  "author": "",
+  "license": "ISC"
+}
