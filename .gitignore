@@ -1,0 +1,40 @@
+# Node.js
+node_modules/
+nwws-xmpp-monitor/node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment variables - CRITICAL for security
+.env
+*.env
+.env.*
+!.env.example
+!.env.sample
+
+# Logs
+logs/
+*.log
+
+# Output directories
+output/
+nwws-xmpp-monitor/output/
+
+# macOS
+.DS_Store
+
+# Editor/IDE specific (optional, but good practice)
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Python (general, good to have even if Python part is mostly gone)
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+venv/
+*/venv/
+*.egg-info/
+pip-wheel-metadata/

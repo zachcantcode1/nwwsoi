@@ -1,0 +1,244 @@
+/* alert_frame.css - Redesigned for two-column layout */
+
+html {
+  box-sizing: border-box;
+  height: 100%; /* Ensure html takes full height */
+}
+
+*,
+*:before,
+*:after {
+  box-sizing: inherit;
+}
+
+body {
+    margin: 0;
+    font-family: 'Roboto', 'Segoe UI', Helvetica, Arial, sans-serif;
+    background-color: #1C1C1C; /* Dark background for the whole page */
+    color: #FFFFFF;
+    height: 100%; /* Ensure body takes full height, will be overridden by inline style for flex */
+    display: flex; /* Added for consistency, though JS overrides with column direction */
+    flex-direction: column; /* Added for consistency */
+}
+
+/* .page-title-bar is styled inline in map_service.py for dynamic color */
+.page-title-bar {
+    padding: 15px 10px; /* Increased padding for more height */
+    text-align: center;
+    font-size: 1.6em;    /* Increased font size */
+    font-weight: bold;
+    color: #FFFFFF;      /* Ensure text is white, though also set inline */
+    line-height: 1.3;
+    /* Flexbox centering for robustness */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0; /* Prevent shrinking if content is too long */
+}
+
+.main-content-area {
+    display: flex;
+    flex-direction: row !important; /* Keeps map and sidebar side-by-side */
+    width: 100%; 
+    flex-grow: 1; /* Allows this area to take up remaining vertical space from body */
+    overflow: hidden; /* Prevent content from causing unexpected scrollbars on this container */
+}
+
+.map-panel {
+    flex: 1 1 auto; 
+    background-color: #23272a; 
+    overflow: hidden; 
+    position: relative; 
+    border-right: 1px solid #444; 
+    height: 100%; /* Make map-panel take full height of main-content-area */
+}
+
+#map {
+    background-color: #23272a !important; 
+    width: 100%;  /* Ensure map takes full width of map-panel */
+    height: 100%; /* Ensure map takes full height of map-panel */
+}
+
+.map-panel .folium-map {
+    /* Ensure map fills the panel */
+    width: 100% !important;
+    height: 100% !important;
+}
+
+.sidebar-panel {
+    flex: 0 0 320px; /* Removed !important */
+    background-color: #2E2E2E; /* Dark gray for sidebar */
+    padding: 20px;
+    color: #FFFFFF;
+    overflow-y: auto; /* Allow scrolling if content exceeds height */
+    box-sizing: border-box;
+    display: flex; /* Added for flex layout */
+    flex-direction: column; /* Stack items vertically */
+    gap: 15px; /* Space between flex items (cards and the h3 title) */
+}
+
+.sidebar-panel h3 {
+    font-size: 18px; /* Adjust sidebar title font size */
+    margin-top: 0;
+    border-bottom: 1px solid #555;
+    padding-bottom: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.detail-block {
+    background-color: #3B3B3B; /* Slightly lighter card background */
+    padding: 15px;
+    border-radius: 8px;
+    flex-grow: 1; /* Allow cards to grow and fill available space */
+    display: flex; /* Added to allow vertical alignment of content if needed */
+    flex-direction: column; /* Stack card content vertically */
+}
+
+.detail-block h4 {
+    font-size: 17px; /* Increased from 15px */
+    color: #FFA500; /* Orange for detail headings */
+    margin-top: 0; /* Adjusted from inline */
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    font-weight: 700;
+}
+
+.detail-block p {
+    font-size: 18px; /* Increased from 16px */
+    margin-top: 0;
+    margin-bottom: 0; /* Adjusted from inline */
+    line-height: 1.5; /* Slightly increased line-height */
+    overflow-wrap: break-word; /* Ensure proper text wrapping */
+    font-weight: bold; /* Added bold font weight */
+}
+
+.sidebar-panel p strong {
+    color: #A0A0A0; /* Lighter grey for the label part */
+}
+
+/* New styles for individual sidebar content cards */
+.sidebar-card {
+    background-color: #363c42; /* Slightly different from sidebar background for card effect */
+    border-radius: 8px;       /* Rounded corners */
+    padding: 12px;
+    margin-bottom: 12px;      /* Space between cards */
+    display: flex;            /* Enable flexbox */
+    align-items: center;      /* Vertically center content */
+}
+
+/* Adjust paragraph styling within cards */
+.sidebar-card p {
+    margin: 0; /* Remove all default p margins */
+    font-size: 0.9em;   /* Retain from general .sidebar-panel p */
+    line-height: 1.6;   /* Retain from general .sidebar-panel p */
+}
+
+/* Ensure the last card doesn't have extra bottom margin if not desired */
+.sidebar-card:last-child {
+    margin-bottom: 0;
+}
+
+/* Container for side-by-side hazard detail cards */
+.hazard-details-container {
+    display: flex;
+    justify-content: space-between; /* Or space-around, depending on desired spacing */
+    margin-bottom: 12px; /* Same margin as other sidebar cards */
+}
+
+/* Individual hazard detail card (e.g., for Wind, Hail) */
+.hazard-detail-card {
+    background-color: #40474F; /* Slightly different background for emphasis */
+    border-radius: 6px;
+    padding: 10px;
+    flex-basis: 48%; /* Adjust for gap, e.g., if using space-between */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.hazard-detail-title {
+    font-size: 0.8em;
+    color: #B0B0B0; /* Lighter text for the title */
+    margin-bottom: 4px;
+    text-transform: uppercase;
+}
+
+.hazard-detail-value {
+    font-size: 1.1em;
+    font-weight: bold;
+    color: #FFFFFF;
+}
+
+/* Remove old styles that are no longer needed */
+/* .alert-frame-container, .alert-map-panel (old), .alert-sidebar (old), .alert-title-bar (old) */
+/* These are effectively replaced by .map-panel and .sidebar-panel and inline styles or new classes */
+
+/* Styles for the new hazard detail cards */
+#inset-map {
+    height: 150px; /* Or your desired height */
+    width: 100%;   /* Take full width of sidebar */
+    margin-top: 15px; /* Space above the inset map */
+    border: 1px solid #444; /* Optional border */
+    background-color: #2d3134; /* Match map panel bg or choose another */
+}
+
+/* Ensure Leaflet controls are not displayed if accidentally enabled via JS for inset map */
+#inset-map .leaflet-control-zoom,
+#inset-map .leaflet-control-attribution {
+    display: none !important;
+}
+
+/* Specific styling for the hazard details container and cards */
+.hazard-details-container {
+    display: flex;
+    justify-content: space-between; /* Or space-around, depending on desired spacing */
+    margin-bottom: 12px; /* Same margin as other sidebar cards */
+}
+
+/* Responsive adjustments for smaller screens */
+@media (max-width: 768px) {
+    .main-content-area {
+        flex-direction: column; /* Stack map and sidebar vertically */
+        height: auto; /* Adjust height for stacked content */
+    }
+
+    .map-panel,
+    .sidebar-panel {
+        width: 100%; /* Full width for stacked items */
+        border-radius: 8px; /* Apply rounded corners to all sides when stacked */
+        margin-bottom: 10px; /* Add some space between stacked items */
+    }
+
+    .map-panel {
+        height: 60vh; /* Example height for map on small screens */
+        border-radius: 8px 8px 0 0 ; /* Top corners rounded */
+    }
+
+    .sidebar-panel {
+        height: auto; /* Adjust height based on content */
+        border-radius: 0 0 8px 8px; /* Bottom corners rounded */
+        margin-bottom: 0;
+    }
+
+    .page-title-bar {
+        font-size: 20px; /* Smaller font for title on small screens */
+        padding: 10px 15px;
+    }
+
+    .sidebar-panel h3 {
+        font-size: 18px; /* Adjust sidebar title font size */
+    }
+
+    .detail-block h4 {
+        font-size: 13px; /* Adjust detail block title font size */
+    }
+
+    .detail-block p {
+        font-size: 14px; /* Adjust detail block text font size */
+    }
+}
+
+/* MAP STYLING */

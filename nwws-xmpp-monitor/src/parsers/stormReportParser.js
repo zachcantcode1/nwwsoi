@@ -36,9 +36,26 @@ export function parseStormReport(rawText, id, stormReportElement) {
 
         reportData.summary = rawParser.getStringByLine(rawText, 'SUMMARY.........') || rawParser.getStringByLine(rawText, 'SUMMARY:');
         reportData.eventLocation = rawParser.getStringByLine(rawText, 'LOCATION........') || rawParser.getStringByLine(rawText, 'LOCATION:');
-        reportData.eventTime = rawParser.getStringByLine(rawText, 'TIME............') || rawParser.getStringByLine(rawText, 'TIME:');
+        
+        // Try to get time from tabular format first
+        reportData.eventTime = rawParser.getTabularLsrEventTime(rawText);
+        // Fallback to dedicated TIME line if tabular time not found
+        if (!reportData.eventTime) {
+            reportData.eventTime = rawParser.getStringByLine(rawText, 'TIME............') || rawParser.getStringByLine(rawText, 'TIME:');
+        }
+
         reportData.dataSource = rawParser.getStringByLine(rawText, 'SOURCE..........') || rawParser.getStringByLine(rawText, 'SOURCE:');
         reportData.remarks = rawParser.getStringByLine(rawText, 'REMARKS.........') || rawParser.getStringByLine(rawText, 'REMARKS:');
+
+        // Attempt to extract single point coordinates
+        const coordinates = rawParser.getSinglePointCoordinates(rawText);
+        if (coordinates) {
+            reportData.latitude = coordinates.latitude;
+            reportData.longitude = coordinates.longitude;
+            console.log(`StormReportParser: Extracted coordinates for ${id}: Lat ${reportData.latitude}, Lon ${reportData.longitude}`);
+        } else {
+            console.log(`StormReportParser: No direct coordinates found for ${id}. Location: "${reportData.eventLocation}". Geocoding might be needed.`);
+        }
 
         // If stormReportElement is provided (e.g., if LSRs are wrapped in some specific XML by NWWS-OI),
         // you could add XML parsing logic here, similar to alertParser.

@@ -1,11 +1,11 @@
 #!/bin/bash
 
-PROJECT_ROOT="/root/visualalerts_v2" # Adjust if deploying elsewhere
+PROJECT_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
 LOG_DIR="$PROJECT_ROOT/logs"
 XMPP_PID_FILE="$LOG_DIR/xmpp_server.pid"
-API_PID_FILE="$LOG_DIR/api_server.pid"
+# API_PID_FILE="$LOG_DIR/api_server.pid"
 
-echo "Stopping services..."
+echo "Stopping XMPP service..."
 
 # Function to stop a process
 stop_process() {
@@ -39,7 +39,7 @@ stop_process() {
     fi
 }
 
-stop_process "$API_PID_FILE" "API Server"
+# stop_process "$API_PID_FILE" "API Server"
 stop_process "$XMPP_PID_FILE" "XMPP Server"
 
 echo "Service shutdown process complete."

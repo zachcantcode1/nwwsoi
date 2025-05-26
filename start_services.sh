@@ -1,10 +1,8 @@
 #!/bin/bash
 
-# Define project root and service directories for the Debian server
-PROJECT_ROOT="/root/visualalerts_v2" # <--- IMPORTANT: Adjusted for Debian server
+# Define project root and service directories
+PROJECT_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
 XMPP_DIR="$PROJECT_ROOT/nwws-xmpp-monitor"
-API_SCRIPT_PATH="$PROJECT_ROOT/weather_alerts/api_server.py"
-REQUIREMENTS_PATH="$PROJECT_ROOT/weather_alerts/requirements.txt"
 LOG_DIR="$PROJECT_ROOT/logs"
 
 # Create log directory if it doesn't exist
@@ -12,13 +10,11 @@ mkdir -p "$LOG_DIR"
 
 # Define log file paths
 XMPP_LOG="$LOG_DIR/xmpp_server.log"
-API_LOG="$LOG_DIR/api_server.log" # For stdout/stderr of python command and pip install
 
 # Define PID file paths
 XMPP_PID_FILE="$LOG_DIR/xmpp_server.pid"
-API_PID_FILE="$LOG_DIR/api_server.pid"
 
-echo "Starting services on Debian server..."
+echo "Starting XMPP service..."
 echo "Project Root: $PROJECT_ROOT"
 
 # --- Start XMPP Server (Node.js) ---
@@ -62,58 +58,10 @@ else
     echo "ERROR: XMPP directory $XMPP_DIR not found."
 fi
 
-# --- Start API Server (Python/Flask) ---
-echo "Attempting to start API server..."
-PYTHON_VENV_ACTIVATE="$PROJECT_ROOT/.venv/bin/activate"
-
-if [ -f "$API_PID_FILE" ] && ps -p $(cat "$API_PID_FILE") > /dev/null; then
-    echo "API server already running with PID $(cat "$API_PID_FILE")."
-else
-    if [ -f "$PYTHON_VENV_ACTIVATE" ]; then
-        source "$PYTHON_VENV_ACTIVATE"
-        echo "Python virtual environment activated."
-
-        if [ -f "$REQUIREMENTS_PATH" ]; then
-            echo "Installing/updating Python dependencies for API server from $REQUIREMENTS_PATH..."
-            pip install -r "$REQUIREMENTS_PATH" >> "$API_LOG" 2>&1
-            if [ $? -ne 0 ]; then
-                echo "ERROR: pip install -r $REQUIREMENTS_PATH failed for API server. Check $API_LOG for details."
-                # Deactivate and exit or handle error appropriately
-                # deactivate
-                # exit 1 # Example: exit if pip install fails
-            else
-                echo "pip install for API server completed."
-            fi
-        else
-            echo "WARNING: requirements.txt not found at $REQUIREMENTS_PATH. Skipping Python dependency installation."
-        fi
-
-        echo "Starting Flask application: $API_SCRIPT_PATH"
-        nohup python "$API_SCRIPT_PATH" >> "$API_LOG" 2>&1 &
-        API_PID=$!
-        echo $API_PID > "$API_PID_FILE"
-        sleep 2 # Give it a bit more time to start or fail
-        if ps -p $API_PID > /dev/null; then
-            echo "API server started successfully with PID $API_PID. Main logs (from Flask app): $PROJECT_ROOT/weather_alerts/flask_server.log. Startup/pip logs: $API_LOG"
-        else
-            echo "ERROR: API server failed to start. Check $API_LOG and $PROJECT_ROOT/weather_alerts/flask_server.log for details (e.g., ModuleNotFoundError)."
-            rm -f "$API_PID_FILE"
-        fi
-        # Deactivate after starting the background process
-        # The 'deactivate' command might not be available if the script exits immediately
-        # or if it's run in a non-interactive shell that doesn't fully source the venv's deactivate logic.
-        # For nohup background processes, the venv activation persists for the launched process.
-    else
-        echo "ERROR: Python virtual environment not found at $PYTHON_VENV_ACTIVATE. API server not started."
-        echo "Please ensure you have created a virtual environment (e.g., python3 -m venv $PROJECT_ROOT/.venv) on the server."
-    fi
-fi
-
 echo "--------------------------------------------------"
 echo "Service startup process complete."
 echo "To check status (example):"
 # Added 2>/dev/null to suppress "cat: No such file or directory" if PID file doesn't exist yet
 echo "  XMPP PID: $(cat $XMPP_PID_FILE 2>/dev/null || echo 'Not running/PID file missing')"
-echo "  API PID:  $(cat $API_PID_FILE 2>/dev/null || echo 'Not running/PID file missing')"
 echo "To stop services, run: $PROJECT_ROOT/stop_services.sh"
 echo "--------------------------------------------------"

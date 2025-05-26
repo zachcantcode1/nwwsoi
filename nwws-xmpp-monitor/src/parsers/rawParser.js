@@ -78,7 +78,119 @@ export class RawParser {
         }
         return coordinates;
     }
-}
+
+    /**
+     * @function getSinglePointCoordinates
+     * @description Get a single latitude and longitude coordinate pair from the message.
+     * Searches for patterns like "LATITUDE: 34.56 LONGITUDE: -90.12" or "LAT/LON: 34.56 / -90.12".
+     * Returns an object { latitude: float, longitude: float } or null if not found.
+     * 
+     * @param {string} message - The message to search in
+     */
+    getSinglePointCoordinates(message) {
+        if (!message) return null;
+
+        // Normalize message: remove excessive whitespace, convert to uppercase for easier matching
+        const normalizedMessage = message.replace(/\s+/g, ' ').toUpperCase();
+
+        let match;
+
+        // Pattern 1: LATITUDE: XX.XX LONGITUDE: YY.YY (allows for N/S/E/W designators)
+        // Example: "LATITUDE: 34.56 N LONGITUDE: 90.12 W"
+        // Example: "LAT: 34.56 LON: -90.12"
+        match = normalizedMessage.match(/(?:LATITUDE|LAT):?\s*(-?\d+\.?\d*)\s*([NS])?\s*(?:LONGITUDE|LON):?\s*(-?\d+\.?\d*)\s*([EW])?/);
+        if (match) {
+            let lat = parseFloat(match[1]);
+            let lon = parseFloat(match[3]);
+            const latSign = match[2];
+            const lonSign = match[4];
+
+            if (latSign === 'S') lat = -lat;
+            if (lonSign === 'W') lon = -lon;
+            // Assume positive longitude is East, negative is West if no E/W specified and value is positive.
+            // NWS data often uses positive for West, so if no 'E' and lon is positive, make it negative.
+            else if (!lonSign && lon > 0) lon = -lon; 
+
+            if (!isNaN(lat) && !isNaN(lon)) {
+                return { latitude: lat, longitude: lon };
+            }
+        }
+
+        // Pattern 2: LAT/LON: XX.XX / YY.YY (slash separated, common in some LSRs)
+        // Example: "LAT/LON: 34.56 / -90.12"
+        // Example: "LAT/LON: 34.56 / 90.12 W"
+        match = normalizedMessage.match(/LAT\/LON:?\s*(-?\d+\.?\d*)\s*\/?\s*(-?\d+\.?\d*)\s*([EW])?/);
+        if (match) {
+            let lat = parseFloat(match[1]);
+            let lon = parseFloat(match[2]);
+            const lonSign = match[3];
+
+            if (lonSign === 'W') lon = -lon;
+            else if (!lonSign && lon > 0) lon = -lon; // Assume positive West if no E/W
+
+            if (!isNaN(lat) && !isNaN(lon)) {
+                return { latitude: lat, longitude: lon };
+            }
+        }
+        
+        // Pattern 3: Separate lines for LAT and LON (e.g. aviation format)
+        // LATITUDE........34.56N
+        // LONGITUDE.......90.12W
+        const latLineMatch = message.match(/^\s*(?:LATITUDE|LAT)\.*\s*(-?\d+\.?\d*)\s*([NS])?/im);
+        const lonLineMatch = message.match(/^\s*(?:LONGITUDE|LON)\.*\s*(-?\d+\.?\d*)\s*([EW])?/im);
+        if (latLineMatch && lonLineMatch) {
+            let lat = parseFloat(latLineMatch[1]);
+            let lon = parseFloat(lonLineMatch[1]); // Corrected index to 1 for lonLineMatch
+
+            if (latLineMatch[2] === 'S') lat = -lat;
+            if (lonLineMatch[2] === 'W') lon = -lon;
+            else if (!lonLineMatch[2] && lon > 0) lon = -lon;
+
+            if (!isNaN(lat) && !isNaN(lon)) {
+                return { latitude: lat, longitude: lon };
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @function getTabularLsrEventTime
+     * @description Extracts the event time from a line in an LSR that typically starts with a time.
+     * Example: "0155 PM     HAIL             1 N CENTRAL PARK      40.78N 73.97W"
+     * Looks for HHMM AM/PM or HHMM Z or HHMM [TZ] at the start of a line.
+     * @param {string} message - The raw LSR text.
+     * @returns {string|null} The extracted time string (e.g., "0155 PM", "0300 CDT", "1800 Z") or null.
+     */
+    getTabularLsrEventTime(message) {
+        if (!message) return null;
+        const lines = message.split('\n');
+        // Regex to find lines starting with a time pattern
+        // Captures: 1:HH, 2:MM, 3:AM/PM/Z (optional), 4:Known Timezone (optional)
+        const timeRegex = /^(\d{2})(\d{2})\s+(?:(AM|PM|Z)|(EDT|EST|CDT|CST|MDT|MST|PDT|PST))\b/i;
+
+        for (const line of lines) {
+            const trimmedLine = line.trim();
+            const match = trimmedLine.match(timeRegex);
+            if (match) {
+                const hour = match[1];
+                const minute = match[2];
+                const meridianOrZ = match[3]; // AM, PM, Z
+                const timezone = match[4];    // EDT, CDT, etc.
+
+                let timeString = `${hour}${minute}`;
+                if (meridianOrZ) {
+                    timeString += ` ${meridianOrZ}`;
+                } else if (timezone) {
+                    timeString += ` ${timezone}`;
+                }
+                return timeString;
+            }
+        }
+        return null;
+    }
+
+} // End of RawParser class
 
 // Example Usage (for testing):
 // const parser = new RawParser();
