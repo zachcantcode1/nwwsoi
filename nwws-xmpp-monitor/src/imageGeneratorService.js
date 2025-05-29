@@ -29,9 +29,9 @@ const NWS_EVENT_COLORS = {
     "tsunami warning": "#FD6347",
     "tornado warning": "#FF0000",
     "extreme wind warning": "#FF8C00",
-    "severe thunderstorm warning": "#FFA500",
-    "flash flood warning": "#8B0000",
-    "flash flood statement": "#8B0000",
+    "severe thunderstorm warning": "#FFBF00", // Changed from #FFA500
+    "flash flood warning": "#E60000", // Changed from #8B0000
+    "flash flood statement": "#E60000", // Also update statement to match warning
     "severe weather statement": "#00FFFF",
     "shelter in place warning": "#FA8072",
     "evacuation immediate": "#7FFF00",
@@ -226,7 +226,7 @@ export class ImageGeneratorService {
             throw new Error('Invalid warningData or missing ID.');
         }
         this.logger.info(`Generating image for warning ID: ${warningData.id}`);
-        const imageFileName = `warning_${warningData.id}_${Date.now()}.png`;
+        const imageFileName = `warning_${warningData.id}_${Date.now()}.jpeg`;
         const imagePath = path.join(this.outputDir, imageFileName);
 
         try {
@@ -318,7 +318,8 @@ export class ImageGeneratorService {
                 this.logger.warn('Timeout or error waiting for window.mapReady:', e.message);
             }
 
-            this.logger.debug('Waiting for network idle before screenshot.');
+            await page.screenshot({ path: imagePath, type: 'jpeg', quality: 85 });
+
             await page.waitForNetworkIdle({ idleTime: 500, timeout: 60000 });
 
             // Log the rendered HTML of key components before taking the screenshot
@@ -345,7 +346,7 @@ export class ImageGeneratorService {
             this.logger.debug({'[PUPPETEER RENDERED] Map Computed Styles': mapComputedStyles});
 
             this.logger.debug('Taking screenshot...');
-            await page.screenshot({ path: imagePath });
+            await page.screenshot({ path: imagePath, type: 'jpeg', quality: 85 });
             await browser.close();
             this.logger.info(`Successfully generated image: ${imagePath}`);
             return imagePath;
