@@ -64,6 +64,7 @@ const handleIncomingMessage = async ({ rawText, id, stanza }) => {
                         const imageBuffer = await fs.readFile(imagePath);
                         parsedData.imageBuffer = imageBuffer;
                         parsedData.imageFileName = path.basename(imagePath); // Extract filename from path
+                        parsedData.imagePath = imagePath; // Store full image path
                     } catch (readError) {
                         console.error(`Index.js: Error reading image file ${imagePath} for alert ${id}:`, readError.message);
                     }
@@ -102,6 +103,7 @@ const handleIncomingMessage = async ({ rawText, id, stanza }) => {
                         // For now, we'll keep the existing call but acknowledge the data is ready.
                         parsedData.imageBuffer = imageBuffer; // Temporarily store buffer here for now
                         parsedData.imageFileName = stormReportImageFileName; // And filename
+                        parsedData.imagePath = imagePath; // Store full image path
 
                     } catch (readError) {
                         console.error(`Index.js: Error reading image file ${imagePath} for storm report ${id}:`, readError.message);
@@ -150,12 +152,19 @@ const handleIncomingMessage = async ({ rawText, id, stanza }) => {
         }
 
         // Prepare for updated sendToWebhook call
-        const { imageBuffer, imageFileName, ...dataToSend } = parsedData;
+        const { imageBuffer, imageFileName, imagePath: localImagePath, ...dataToSend } = parsedData;
 
         if (imageBuffer && imageFileName) {
             // Call sendToWebhook with separate arguments for JSON data, image buffer, and image filename
             sendToWebhook(webhookUrl, dataToSend, imageBuffer, imageFileName)
-                .then(() => console.log('Index.js: Successfully sent multipart data to webhook for ID:', id))
+                .then(() => {
+                    console.log('Index.js: Successfully sent multipart data to webhook for ID:', id);
+                    if (localImagePath) { // Check if localImagePath was defined (i.e., an image was processed)
+                        fs.unlink(localImagePath)
+                            .then(() => console.log(`Index.js: Successfully deleted image ${localImagePath}`))
+                            .catch(err => console.error(`Index.js: Error deleting image ${localImagePath}:`, err.message));
+                    }
+                })
                 .catch(error => console.error('Index.js: Error sending multipart data to webhook for ID:', id, error.message ? error.message : error));
         } else {
             // Send data without image if image wasn't generated or read (pass undefined for buffer and filename)
