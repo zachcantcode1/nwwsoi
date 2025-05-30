@@ -13,16 +13,17 @@ export class RawParser {
      * @param {string} message - The message to search in
      * @param {string} string - The string to search for
      */
-    getStringByLine(message, string) {
-        if (!message || !string) return null;
+    getStringByLine(message, searchString) {
+        if (!message || !searchString) return null;
         const lines = message.split('\n');
+        const lowerSearchString = searchString.toLowerCase();
         for (let i = 0; i < lines.length; i++) {
-            if (lines[i].includes(string)) {
-                const start = lines[i].indexOf(string) + string.length;
-                // const end = lines[i].length; // Original logic
-                // let result = lines[i].substring(start, end); // Original logic
-                let result = lines[i].substring(start);
-                return result.replace(/^\s+|\s+$/g, '').replace(/<$/, '').trim(); // Removed < replacement, as it might be too broad
+            const lowerLine = lines[i].toLowerCase();
+            if (lowerLine.includes(lowerSearchString)) {
+                const startIndexInOriginal = lowerLine.indexOf(lowerSearchString) + searchString.length;
+                let result = lines[i].substring(startIndexInOriginal);
+                // Trim leading/trailing whitespace, and specifically colons or periods often found after the label
+                return result.replace(/^[\s.:]+/, '').trim();
             }
         }
         return null;
@@ -89,17 +90,20 @@ export class RawParser {
      */
     getSinglePointCoordinates(message) {
         if (!message) return null;
+        console.log(`RawParser.getSinglePointCoordinates: Original message (first 300 chars): ${message.substring(0, 300)}`);
 
-        // Normalize message: remove excessive whitespace, convert to uppercase for easier matching
-        const normalizedMessage = message.replace(/\s+/g, ' ').toUpperCase();
-
+        // Normalize message: uppercase, replace multiple spaces/newlines with single space for easier regex
+        const normalizedMessage = message.toUpperCase().replace(/\s\s+/g, ' ');
+        console.log(`RawParser.getSinglePointCoordinates: Normalized message (first 300 chars): ${normalizedMessage.substring(0,300)}`);
         let match;
 
-        // Pattern 1: LATITUDE: XX.XX LONGITUDE: YY.YY (allows for N/S/E/W designators)
+        // Pattern 1: LATITUDE: XX.XX LONGITUDE: YY.YY (optional N/S/E/W)
         // Example: "LATITUDE: 34.56 N LONGITUDE: 90.12 W"
-        // Example: "LAT: 34.56 LON: -90.12"
-        match = normalizedMessage.match(/(?:LATITUDE|LAT):?\s*(-?\d+\.?\d*)\s*([NS])?\s*(?:LONGITUDE|LON):?\s*(-?\d+\.?\d*)\s*([EW])?/);
+        // Example: "LATITUDE: 34.56 LONGITUDE: -90.12"
+        // Example: "LAT:34.56N LON:90.12W"
+        match = normalizedMessage.match(/(?:LATITUDE|LAT)[:.]?\s*(-?\d+\.?\d*)\s*([NS])?\s*(?:LONGITUDE|LON|LNG)[:.]?\s*(-?\d+\.?\d*)\s*([EW])?/);
         if (match) {
+            console.log("RawParser.getSinglePointCoordinates: Matched Pattern 1");
             let lat = parseFloat(match[1]);
             let lon = parseFloat(match[3]);
             const latSign = match[2];
@@ -112,6 +116,7 @@ export class RawParser {
             else if (!lonSign && lon > 0) lon = -lon; 
 
             if (!isNaN(lat) && !isNaN(lon)) {
+                console.log(`RawParser.getSinglePointCoordinates: Coords from P1: lat=${lat}, lon=${lon}`);
                 return { latitude: lat, longitude: lon };
             }
         }
@@ -121,6 +126,7 @@ export class RawParser {
         // Example: "LAT/LON: 34.56 / 90.12 W"
         match = normalizedMessage.match(/LAT\/LON:?\s*(-?\d+\.?\d*)\s*\/?\s*(-?\d+\.?\d*)\s*([EW])?/);
         if (match) {
+            console.log("RawParser.getSinglePointCoordinates: Matched Pattern 2");
             let lat = parseFloat(match[1]);
             let lon = parseFloat(match[2]);
             const lonSign = match[3];
@@ -129,16 +135,19 @@ export class RawParser {
             else if (!lonSign && lon > 0) lon = -lon; // Assume positive West if no E/W
 
             if (!isNaN(lat) && !isNaN(lon)) {
+                console.log(`RawParser.getSinglePointCoordinates: Coords from P2: lat=${lat}, lon=${lon}`);
                 return { latitude: lat, longitude: lon };
             }
         }
         
         // Pattern 3: Separate lines for LAT and LON (e.g. aviation format)
+        // This pattern operates on the original, non-normalized message due to its line-specific nature.
         // LATITUDE........34.56N
         // LONGITUDE.......90.12W
         const latLineMatch = message.match(/^\s*(?:LATITUDE|LAT)\.*\s*(-?\d+\.?\d*)\s*([NS])?/im);
         const lonLineMatch = message.match(/^\s*(?:LONGITUDE|LON)\.*\s*(-?\d+\.?\d*)\s*([EW])?/im);
         if (latLineMatch && lonLineMatch) {
+            console.log("RawParser.getSinglePointCoordinates: Matched Pattern 3");
             let lat = parseFloat(latLineMatch[1]);
             let lon = parseFloat(lonLineMatch[1]); // Corrected index to 1 for lonLineMatch
 
@@ -147,10 +156,33 @@ export class RawParser {
             else if (!lonLineMatch[2] && lon > 0) lon = -lon;
 
             if (!isNaN(lat) && !isNaN(lon)) {
+                console.log(`RawParser.getSinglePointCoordinates: Coords from P3: lat=${lat}, lon=${lon}`);
                 return { latitude: lat, longitude: lon };
             }
         }
 
+        // Pattern 4: Direct DD.DDN DDD.DDW format (often in tabular LSRs)
+        // Example: "27.64N 81.55W"
+        // This pattern is applied to the normalizedMessage.
+        match = normalizedMessage.match(/(\d{1,2}\.\d+)([NS])\s+(\d{1,3}\.\d+)([EW])/);
+        if (match) {
+            console.log("RawParser.getSinglePointCoordinates: Matched Pattern 4");
+            let lat = parseFloat(match[1]);
+            let lon = parseFloat(match[3]);
+            const latSign = match[2];
+            const lonSign = match[4];
+
+            if (latSign === 'S') lat = -lat;
+            if (lonSign === 'W') lon = -lon;
+            // No need to assume positive West for this pattern as E/W is explicit
+
+            if (!isNaN(lat) && !isNaN(lon)) {
+                console.log(`RawParser.getSinglePointCoordinates: Coords from P4: lat=${lat}, lon=${lon}`);
+                return { latitude: lat, longitude: lon };
+            }
+        }
+
+        console.log("RawParser.getSinglePointCoordinates: No coordinate patterns matched.");
         return null;
     }
 
@@ -165,13 +197,13 @@ export class RawParser {
     getTabularLsrEventTime(message) {
         if (!message) return null;
         const lines = message.split('\n');
-        // Regex to find lines starting with a time pattern
+        // Regex to find lines that may start with whitespace then a time pattern
         // Captures: 1:HH, 2:MM, 3:AM/PM/Z (optional), 4:Known Timezone (optional)
-        const timeRegex = /^(\d{2})(\d{2})\s+(?:(AM|PM|Z)|(EDT|EST|CDT|CST|MDT|MST|PDT|PST))\b/i;
+        const timeRegex = /^\s*(\d{2})(\d{2})\s+(?:(AM|PM|Z)|(EDT|EST|CDT|CST|MDT|MST|PDT|PST))\b/i;
 
         for (const line of lines) {
-            const trimmedLine = line.trim();
-            const match = trimmedLine.match(timeRegex);
+            // No trim here, regex handles leading space
+            const match = line.match(timeRegex);
             if (match) {
                 const hour = match[1];
                 const minute = match[2];

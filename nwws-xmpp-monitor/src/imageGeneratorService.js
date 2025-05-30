@@ -126,7 +126,7 @@ const NWS_EVENT_COLORS = {
     "911 telephone outage": "#C0C0C0",
     "coastal flood statement": "#6B8E23",
     "lakeshore flood statement": "#6B8E23",
-    "special weather statement": "#FFE4B5",
+    "special weather statement": "#00FAD4",
     "marine weather statement": "#FFDAB9",
     "air quality alert": "#808080",
     "air stagnation advisory": "#808080",
@@ -282,7 +282,8 @@ export class ImageGeneratorService {
                 expires,        // Corrected name
                 affectedAreas,
                 hazards,
-                issuingOffice
+                issuingOffice,
+                magnitude: warningData.magnitude
             };
             const htmlContent = await this._getHtmlForPuppeteer(templateData);
 
@@ -362,197 +363,203 @@ export class ImageGeneratorService {
             throw error;
         }
     }
+async _getHtmlForPuppeteer(data) {
+    this.logger.debug({ detailedTemplateData: data }, '[GET_HTML] Full templateData object received for HTML generation.');
 
-    async _getHtmlForPuppeteer(data) {
-        this.logger.debug({ detailedTemplateData: data }, '[GET_HTML] Full templateData object received for HTML generation.');
+    const { 
+        eventType, 
+        expires, 
+        affectedAreas, 
+        hazards, 
+        issuingOffice, 
+        warningColor, 
+        headline, 
+        polygonGeoJson, // Expecting this to be the GeoJSON object for the polygon
+        mapCenter,      // Expecting this to be an array like [lat, lon]
+        mapZoom,        // Expecting this to be a number
+        insetMapZoom,   // Expecting this to be a number
+        magnitude
+    } = data;
 
-        const { 
-            eventType, 
-            expires, 
-            affectedAreas, 
-            hazards, 
-            issuingOffice, 
-            warningColor, 
-            headline, 
-            polygonGeoJson, // Expecting this to be the GeoJSON object for the polygon
-            mapCenter,      // Expecting this to be an array like [lat, lon]
-            mapZoom,        // Expecting this to be a number
-            insetMapZoom    // Expecting this to be a number
-        } = data;
+    const cssContent = await this._loadCssContent();
 
-        const cssContent = await this._loadCssContent();
+    // Basic parsing for wind and hail from the hazards string
+    let windValue = "N/A";
+    let hailValue = "N/A";
 
-        // Basic parsing for wind and hail from the hazards string
-        let windValue = "N/A";
-        let hailValue = "N/A";
-
-        if (hazards) {
-            // Try to find wind speed (e.g., "60 MPH" or "60mph")
-            const windMatch = hazards.match(/(\d+(\.\d+)?)\s*M?P?H?/i);
-            if (windMatch && windMatch[1]) {
-                windValue = windMatch[1] + " MPH";
-            }
-
-            // Try to find hail size (e.g., "1.00 inches" or "1.00 inch")
-            const hailMatch = hazards.match(/(\d+(\.\d+)?)\s*INCH(ES)?/i);
-            if (hailMatch && hailMatch[1]) {
-                hailValue = hailMatch[1] + " IN"; // Using IN for brevity in the card
-            }
+    if (hazards) {
+        // Try to find wind speed (e.g., "60 MPH" or "60mph")
+        const windMatch = hazards.match(/(\d+(\.\d+)?)\s*M?P?H?/i);
+        if (windMatch && windMatch[1]) {
+            windValue = windMatch[1] + " MPH";
         }
-        this.logger.debug(`Parsed hazards - Wind: ${windValue}, Hail: ${hailValue}`);
 
-        // Prepare polygonGeoJson as a string once to avoid issues with undefined/null in template
-        const polygonGeoJsonString = polygonGeoJson ? JSON.stringify(polygonGeoJson) : 'null';
-
-        return `
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <title>Weather Alert: ${eventType || 'Weather Alert'}</title>
-                <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
-                <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-                <style>
-                    ${cssContent}
-                    /* Ensure page-title-bar dynamic color is applied */
-                    .page-title-bar {
-                        background-color: ${warningColor || '#FF0000'}; /* Dynamic color, fallback to red */
-                        color: #FFFFFF; /* Ensure text is white */
-                    }
-                </style>
-            </head>
-            <body style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background-color: #121212; color: #e0e0e0; display: flex; flex-direction: column; height: 100vh;">
-                <div class="page-title-bar">
-                    ${eventType || 'Weather Alert'}
-                </div>
-                <div class="main-content-area">
-                    <div class="map-panel">
-                        <div id="map"></div>
-                    </div>
-                    <div class="sidebar-panel">
-                        <div class="sidebar-card"><p><strong>Expires:</strong> ${expires || 'N/A'}</p></div>
-                        <div class="sidebar-card"><p><strong>Affected Areas:</strong> ${affectedAreas || 'Not specified'}</p></div>
-                        
-                        <div class="hazard-details-container">
-                            <div class="hazard-detail-card">
-                                <div class="hazard-detail-title">WIND</div>
-                                <div class="hazard-detail-value">${windValue}</div>
-                            </div>
-                            <div class="hazard-detail-card">
-                                <div class="hazard-detail-title">HAIL</div>
-                                <div class="hazard-detail-value">${hailValue}</div>
-                            </div>
-                        </div>
-
-                        <div class="sidebar-card"><p><strong>Issuing Office:</strong> ${issuingOffice || 'NWS'}</p></div>
-                        <div id="inset-map"></div>
-                    </div>
-                </div>
-
-                <script>
-                    document.addEventListener('DOMContentLoaded', function () {
-                        try { // Outer try-catch for all JS
-                            const effectiveMapCenter = [${(mapCenter && mapCenter.length === 2) ? mapCenter[0] : 39.8283}, ${(mapCenter && mapCenter.length === 2) ? mapCenter[1] : -98.5795}];
-                            const effectiveMapZoom = typeof mapZoom === 'number' ? mapZoom : 4;
-                            const effectiveInsetMapZoom = typeof insetMapZoom === 'number' ? insetMapZoom : 6;
-                            const effectiveWarningColor = "${warningColor || '#FFA500'}";
-                            const polygonData = ${polygonGeoJsonString}; // Moved polygonData here
-
-                            // Main Map Initialization
-                            try {
-                                const map = L.map('map', {
-                                    center: effectiveMapCenter,
-                                    zoom: effectiveMapZoom,
-                                    dragging: false,
-                                    touchZoom: false,
-                                    doubleClickZoom: false,
-                                    scrollWheelZoom: false,
-                                    boxZoom: false,
-                                    keyboard: false,
-                                    zoomControl: false,
-                                    attributionControl: true 
-                                });
-
-                                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                                    maxZoom: 19,
-                                    attribution: 'OpenStreetMap contributors'
-                                }).addTo(map);
-
-                                if (polygonData && polygonData.type) {
-                                    console.log('[Leaflet Script] Main Map Polygon Data for L.geoJSON:', JSON.stringify(polygonData));
-                                    L.geoJSON(polygonData, {
-                                        style: function (feature) {
-                                            return {
-                                                color: effectiveWarningColor,
-                                                weight: 3,
-                                                opacity: 0.7,
-                                                fillColor: effectiveWarningColor,
-                                                fillOpacity: 0.2
-                                            };
-                                        }
-                                    }).addTo(map);
-                                    map.fitBounds(L.geoJSON(polygonData).getBounds().pad(0.1)); // Adjust padding as needed
-                                    console.log('[Leaflet Script] Main map polygon layer added and map bounds fitted.');
-                                } else {
-                                    console.log('[Leaflet Script] No polygon data for main map.');
-                                }
-                                window.mapReady = true; // Main map success
-                            } catch (e) {
-                                console.error('[Leaflet Script] Error initializing main map:', e);
-                                document.getElementById('map').innerHTML = '<p style="color: red; text-align: center;">Error loading main map: ' + e.message + '</p>';
-                                window.mapReady = false; // Main map failure
-                            }
-
-                            // Inset Map Initialization
-                            try {
-                                const insetMap = L.map('inset-map', {
-                                    center: effectiveMapCenter,
-                                    zoom: effectiveInsetMapZoom,
-                                    dragging: false,
-                                    touchZoom: false,
-                                    doubleClickZoom: false,
-                                    scrollWheelZoom: false,
-                                    boxZoom: false,
-                                    keyboard: false,
-                                    zoomControl: false, 
-                                    attributionControl: false 
-                                });
-
-                                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                                    maxZoom: 18,
-                                }).addTo(insetMap);
-
-                                if (polygonData && polygonData.type) {
-                                    console.log('[Leaflet Script] Inset Map Polygon Data for L.geoJSON:', JSON.stringify(polygonData));
-                                    L.geoJSON(polygonData, {
-                                        style: function (feature) {
-                                            return {
-                                                color: effectiveWarningColor,
-                                                weight: 2, 
-                                                opacity: 0.6,
-                                                fillColor: effectiveWarningColor,
-                                                fillOpacity: 0.15
-                                            };
-                                        }
-                                    }).addTo(insetMap);
-                                    console.log('[Leaflet Script] Inset map polygon layer added.');
-                                } else {
-                                    console.log('[Leaflet Script] No polygon data for inset map.');
-                                }
-                            } catch (e) {
-                                console.error('[Leaflet Script] Error initializing inset map:', e);
-                                document.getElementById('inset-map').innerHTML = '<p style="color: red; text-align: center;">Error loading inset map: ' + e.message + '</p>';
-                                // Do not set window.mapReady to false here, as main map might be fine
-                            }
-                        } catch (e) { // Catch errors in defining effective vars or other general setup
-                            console.error('[Leaflet Script] General error in Leaflet setup:', e);
-                            window.mapReady = false; // General failure
-                        }
-                    });
-                </script>
-            </body>
-            </html>
-        `;
+        // Try to find hail size (e.g., "1.00 inches" or "1.00 inch")
+        const hailMatch = hazards.match(/(\d+(\.\d+)?)\s*INCH(ES)?/i);
+        if (hailMatch && hailMatch[1]) {
+            hailValue = hailMatch[1] + " IN"; // Using IN for brevity in the card
+        }
     }
+    this.logger.debug(`Parsed hazards - Wind: ${windValue}, Hail: ${hailValue}`);
+
+    // Prepare polygonGeoJson as a string once to avoid issues with undefined/null in template
+    const polygonGeoJsonString = polygonGeoJson ? JSON.stringify(polygonGeoJson) : 'null';
+
+    return `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Weather Alert: ${eventType || 'Weather Alert'}</title>
+            <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+            <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+            <style>
+                ${cssContent}
+                /* Ensure page-title-bar dynamic color is applied */
+                .page-title-bar {
+                    background-color: ${warningColor || '#FF0000'}; /* Dynamic color, fallback to red */
+                    color: #FFFFFF; /* Ensure text is white */
+                }
+            </style>
+        </head>
+        <body style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background-color: #121212; color: #e0e0e0; display: flex; flex-direction: column; height: 100vh;">
+            <div class="page-title-bar">
+                ${eventType || 'Weather Alert'}
+            </div>
+            <div class="main-content-area">
+                <div class="map-panel">
+                    <div id="map"></div>
+                </div>
+                <div class="sidebar-panel">
+                    <div class="sidebar-card"><p><strong>Expires:</strong> ${expires || 'N/A'}</p></div>
+                    <div class="sidebar-card"><p><strong>Affected Areas:</strong> ${affectedAreas || 'Not specified'}</p></div>
+                    
+                    <div class="hazard-details-container">
+                        <div class="hazard-detail-card">
+                            <div class="hazard-detail-title">WIND</div>
+                            <div class="hazard-detail-value">${windValue}</div>
+                        </div>
+                        <div class="hazard-detail-card">
+                            <div class="hazard-detail-title">HAIL</div>
+                            <div class="hazard-detail-value">${hailValue}</div>
+                        </div>
+                        ${magnitude ? `
+                        <div class="hazard-detail-card">
+                            <div class="hazard-detail-title">MAGNITUDE</div>
+                            <div class="hazard-detail-value">${magnitude}</div>
+                        </div>
+                        ` : ''}
+                    </div>
+
+                    <div class="sidebar-card"><p><strong>Issuing Office:</strong> ${issuingOffice || 'NWS'}</p></div>
+                    <div id="inset-map"></div>
+                </div>
+            </div>
+
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    try { // Outer try-catch for all JS
+                        const effectiveMapCenter = [${(mapCenter && mapCenter.length === 2) ? mapCenter[0] : 39.8283}, ${(mapCenter && mapCenter.length === 2) ? mapCenter[1] : -98.5795}];
+                        const effectiveMapZoom = typeof mapZoom === 'number' ? mapZoom : 4;
+                        const effectiveInsetMapZoom = typeof insetMapZoom === 'number' ? insetMapZoom : 6;
+                        const effectiveWarningColor = "${warningColor || '#FFA500'}";
+                        const polygonData = ${polygonGeoJsonString}; // Moved polygonData here
+
+                        // Main Map Initialization
+                        try {
+                            const map = L.map('map', {
+                                center: effectiveMapCenter,
+                                zoom: effectiveMapZoom,
+                                dragging: false,
+                                touchZoom: false,
+                                doubleClickZoom: false,
+                                scrollWheelZoom: false,
+                                boxZoom: false,
+                                keyboard: false,
+                                zoomControl: false,
+                                attributionControl: true 
+                            });
+
+                            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                                maxZoom: 19,
+                                attribution: 'OpenStreetMap contributors'
+                            }).addTo(map);
+
+                            if (polygonData && polygonData.type) {
+                                console.log('[Leaflet Script] Main Map Polygon Data for L.geoJSON:', JSON.stringify(polygonData));
+                                L.geoJSON(polygonData, {
+                                    style: function (feature) {
+                                        return {
+                                            color: effectiveWarningColor,
+                                            weight: 3,
+                                            opacity: 0.7,
+                                            fillColor: effectiveWarningColor,
+                                            fillOpacity: 0.2
+                                        };
+                                    }
+                                }).addTo(map);
+                                map.fitBounds(L.geoJSON(polygonData).getBounds().pad(0.1)); // Adjust padding as needed
+                                console.log('[Leaflet Script] Main map polygon layer added and map bounds fitted.');
+                            } else {
+                                console.log('[Leaflet Script] No polygon data for main map.');
+                            }
+                            window.mapReady = true; // Main map success
+                        } catch (e) {
+                            console.error('[Leaflet Script] Error initializing main map:', e);
+                            document.getElementById('map').innerHTML = '<p style="color: red; text-align: center;">Error loading main map: ' + e.message + '</p>';
+                            window.mapReady = false; // Main map failure
+                        }
+
+                        // Inset Map Initialization
+                        try {
+                            const insetMap = L.map('inset-map', {
+                                center: effectiveMapCenter,
+                                zoom: effectiveInsetMapZoom,
+                                dragging: false,
+                                touchZoom: false,
+                                doubleClickZoom: false,
+                                scrollWheelZoom: false,
+                                boxZoom: false,
+                                keyboard: false,
+                                zoomControl: false, 
+                                attributionControl: false 
+                            });
+
+                            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                                maxZoom: 18,
+                            }).addTo(insetMap);
+
+                            if (polygonData && polygonData.type) {
+                                console.log('[Leaflet Script] Inset Map Polygon Data for L.geoJSON:', JSON.stringify(polygonData));
+                                L.geoJSON(polygonData, {
+                                    style: function (feature) {
+                                        return {
+                                            color: effectiveWarningColor,
+                                            weight: 2, 
+                                            opacity: 0.6,
+                                            fillColor: effectiveWarningColor,
+                                            fillOpacity: 0.15
+                                        };
+                                    }
+                                }).addTo(insetMap);
+                                console.log('[Leaflet Script] Inset map polygon layer added.');
+                            } else {
+                                console.log('[Leaflet Script] No polygon data for inset map.');
+                            }
+                        } catch (e) {
+                            console.error('[Leaflet Script] Error initializing inset map:', e);
+                            document.getElementById('inset-map').innerHTML = '<p style="color: red; text-align: center;">Error loading inset map: ' + e.message + '</p>';
+                            // Do not set window.mapReady to false here, as main map might be fine
+                        }
+                    } catch (e) { // Catch errors in defining effective vars or other general setup
+                        console.error('[Leaflet Script] General error in Leaflet setup:', e);
+                        window.mapReady = false; // General failure
+                    }
+                });
+            </script>
+        </body>
+        </html>
+    `;
+}
 
     async _loadCssContent() {
         try {

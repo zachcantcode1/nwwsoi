@@ -1,6 +1,7 @@
 import { RawParser } from './rawParser.js';
 import { VtecParser } from './vtecParser.js';
 import { UgcParser } from './ugcParser.js';
+import { definitions } from './parser_config.js'; // Added import
 
 const rawParser = new RawParser();
 const vtecParser = new VtecParser();
@@ -250,6 +251,12 @@ export function parseAlert(rawText, id, capAlertElement) {
         alertData.description = capDetails.description;
         alertData.instruction = capDetails.instruction;
         alertData.affectedAreasDescription = capDetails.areaDesc;
+
+        // Check if the event should be ignored
+        if (alertData.event && definitions.ignored_event_names && definitions.ignored_event_names.includes(alertData.event)) {
+            console.log(`AlertParser: Event "${alertData.event}" for ID ${id} is in the ignore list. Skipping.`);
+            return null; // Indicate that this alert should be ignored
+        }
 
     } catch (error) {
         console.error(`AlertParser: Error parsing alert ${id}:`, error);

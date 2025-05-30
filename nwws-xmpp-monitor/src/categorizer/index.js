@@ -38,6 +38,8 @@ function findCapAlert(element) {
     return null;
 }
 
+const IGNORED_EVENT_TYPES = ["Test Message", "Small Craft Advisory", "Severe Thunderstorm Watch"];
+
 export async function categorizeMessage(rawText, id, stanza) {
     console.log('Categorizer: Received stanza for categorization. Stanza name:', stanza?.name);
     let capAlertElement = null;
@@ -133,6 +135,33 @@ export async function categorizeMessage(rawText, id, stanza) {
 
     if (capAlertElement) {
         console.log('Categorizer: CAP Alert found. ID:', id);
+
+        // Event Type Filtering
+        let eventString = null;
+        // Heuristic: if no getChild method, assume it's an xml2js plain object
+        const isXmlJsObject = typeof capAlertElement.getChild !== 'function';
+
+        if (isXmlJsObject) { // xml2js object (typically parsedJsObject.alert)
+            const infoBlock = Array.isArray(capAlertElement.info) ? capAlertElement.info[0] : capAlertElement.info;
+            if (infoBlock && typeof infoBlock.event === 'string') {
+                eventString = infoBlock.event;
+            }
+        } else { // @xmpp/xml element
+            const infoEl = capAlertElement.getChild('info');
+            if (infoEl) {
+                const eventEl = infoEl.getChild('event');
+                if (eventEl) {
+                    eventString = eventEl.text();
+                }
+            }
+        }
+
+        if (eventString && IGNORED_EVENT_TYPES.includes(eventString)) {
+            console.log(`Categorizer: Ignoring CAP alert (ID: ${id}) due to event type: "${eventString}"`);
+            return { category: 'cap_alert_ignored_event_type', eventType: eventString, capAlertElement: null }; 
+        }
+        // End Event Type Filtering
+
         return { category: 'alert', capAlertElement: capAlertElement };
     }
 

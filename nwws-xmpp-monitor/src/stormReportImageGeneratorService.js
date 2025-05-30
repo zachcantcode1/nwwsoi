@@ -208,6 +208,7 @@ export class StormReportImageGeneratorService {
         const dataSource = reportData.dataSource || 'Source not specified.';
         const remarks = reportData.remarks || 'No remarks.';
         const rawText = reportData.raw_product_text || '';
+        const magnitude = reportData.magnitude || 'N/A';
 
         // Generic color for storm reports, or derive one if needed later
         const reportColor = "#4682B4"; // Steel Blue, a generic color
@@ -257,6 +258,7 @@ export class StormReportImageGeneratorService {
                         <h3>${eventType}</h3>
                         <div class="sidebar-card"><p><strong>Location:</strong> ${eventLocation}</p></div>
                         <div class="sidebar-card"><p><strong>Time:</strong> ${eventTime}</p></div>
+                        <div class="sidebar-card"><p><strong>Magnitude:</strong> ${magnitude}</p></div>
                         <div class="sidebar-card"><p><strong>Source:</strong> ${dataSource}</p></div>
                         <div class="sidebar-card remarks-card"><p>${remarks.replace(/\n/g, '<br>')}</p></div>
                         
