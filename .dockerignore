@@ -1,0 +1,10 @@
+# Exclude dependencies and build artifacts
+node_modules
+nwws-xmpp-monitor/node_modules
+
+# Exclude generated output and logs
+output
+logs
+
+# Exclude environment files
+.env

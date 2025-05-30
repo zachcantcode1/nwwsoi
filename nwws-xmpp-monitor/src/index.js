@@ -19,6 +19,7 @@ import { XMPPClient } from './xmpp/client.js';
 import { categorizeMessage } from './categorizer/index.js';
 import { parseAlert } from './parsers/alertParser.js';
 import { parseStormReport } from './parsers/stormReportParser.js';
+import { definitions } from './parsers/parser_config.js';
 import { StormReportImageGeneratorService } from './stormReportImageGeneratorService.js';
 import { ImageGeneratorService as AlertImageGeneratorService } from './imageGeneratorService.js';
 import { sendToWebhook } from './webhook/sender.js';
@@ -49,7 +50,12 @@ const handleIncomingMessage = async ({ rawText, id, stanza }) => {
     if (category === 'alert') {
         // Pass the rawText, id, and the found capAlertElement to the parser
         parsedData = parseAlert(rawText, id, capAlertElementForParser);
-        if (parsedData) {
+        if (parsedData && parsedData.vtecEvent && parsedData.vtecEvent.eventName) {
+            if (!definitions.allowed_event_names.includes(parsedData.vtecEvent.eventName)) {
+                console.log(`Index.js: Event name "${parsedData.vtecEvent.eventName}" for ID ${id} is not in the allowed list. Skipping processing.`);
+                return; // Skip processing for this event
+            }
+            // Event name is allowed, proceed with image generation
             parsedData.messageType = 'alert'; // Add messageType for alerts
             try {
                 // Sanitize ID for use in filename

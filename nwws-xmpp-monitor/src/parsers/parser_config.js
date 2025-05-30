@@ -43,23 +43,10 @@ export const definitions = {
         // ... add all other relevant action codes
     },
 
-    ignored_event_names: [
-        "Air Quality Alert",
-        "Coastal Flood Advisory",
-        "Dense Fog Advisory",
-        "Extreme Heat Warning",
-        "Fire Weather Watch",
-        "Flood Advisory",
-        "Gale Warning",
-        "Gale Watch",
-        "Heat Advisory",
-        "High Wind Watch",
-        "Hydrologic Outlook",
-        "Lake Wind Advisory",
-        "Marine Weather Statement",
-        "Rip Current Statement",
-        "Special Marine Warning",
-        "Tornado Watch",
-        "Wind Advisory"
+    allowed_event_names: [
+        "Tornado Warning",
+        "Severe Thunderstorm Warning",
+        "Flash Flood Warning",
+        "Flood Warning"
     ]
 };

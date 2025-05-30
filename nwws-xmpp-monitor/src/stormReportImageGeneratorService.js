@@ -202,7 +202,11 @@ export class StormReportImageGeneratorService {
         // Ensure basic data is present
         const id = reportData.id || 'N/A';
         const eventType = reportData.type || 'Storm Report'; // Use reportData.type
-        const summary = reportData.summary || 'No summary available.';
+        const rawSummary = reportData.summary || 'No summary available.';
+        const summary = ['TSTM WND DMG', 'NON TSTM WND DMG']
+            .includes(rawSummary.toUpperCase())
+            ? 'WIND DAMAGE'
+            : rawSummary;
         const eventLocation = reportData.eventLocation || 'Location not specified.';
         const eventTime = reportData.eventTime || 'Time not specified.';
         const dataSource = reportData.dataSource || 'Source not specified.';
