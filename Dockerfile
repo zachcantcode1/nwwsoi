@@ -43,6 +43,10 @@ RUN apt-get update && \
         xdg-utils \
     && apt-get clean
 
+# Install Chromium directly
+RUN npm install -g @puppeteer/browsers
+RUN npx @puppeteer/browsers install chromium@latest --path /usr/src/app/chromium
+
 WORKDIR /usr/src/app
 COPY nwws-xmpp-monitor/package*.json ./
 RUN npm ci --only=production
@@ -56,8 +60,12 @@ ENV NODE_ENV=production
 
 # Final image
 FROM node:18-bullseye-slim
-COPY --from=builder /usr/src/app /usr/src/app
-WORKDIR /usr/src/app
 
-# Default command to start the XMPP monitor service
+# Copy installed dependencies and Chromium
+COPY --from=builder /usr/src/app /usr/src/app
+
+# Set Chromium path
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/src/app/chromium/chrome-linux64/chrome
+
+WORKDIR /usr/src/app
 CMD ["npm", "start"]
