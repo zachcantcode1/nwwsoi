@@ -8,22 +8,17 @@ ENV DEBIAN_FRONTEND=noninteractive
 # Ensure /etc/apt/keyrings directory exists (suggested by some GPG error solutions)
 RUN mkdir -p /etc/apt/keyrings
 
-# Attempt to fix GPG issues and install dependencies
-# 1. Clean apt lists thoroughly.
-# 2. Temporarily allow insecure repositories to fetch initial package lists and install core GPG/CA tools.
-#    This is a workaround to bootstrap the keyring installation if the base image keys are problematic.
-# 3. Install gnupg, ca-certificates, and debian-archive-keyring.
-# 4. Run apt-get update AGAIN, this time it should be secure using the newly installed keyrings.
-# 5. Install all other dependencies.
-# 6. Clean up apt lists to reduce image size.
+# Layer 1: Clean, initial insecure update, reinstall keyrings, install gnupg, and clean again.
+# This aims to fix GPG key issues and manage disk space before further installations.
 RUN apt-get clean && \
-    rm -rf /var/lib/apt/lists/* && \
+    rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/* && \
     apt-get update -o Acquire::AllowInsecureRepositories=true && \
-    apt-get install -y --no-install-recommends \
-        gnupg \
-        ca-certificates \
-        debian-archive-keyring && \
-    apt-get update && \
+    apt-get install -y --no-install-recommends gnupg ca-certificates && \
+    apt-get install -y --no-install-recommends --reinstall debian-archive-keyring && \
+    rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*
+
+# Layer 2: Secure update and install all dependencies, then clean.
+RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     fonts-liberation \
     libasound2 \
@@ -57,7 +52,7 @@ RUN apt-get clean && \
     libxtst6 \
     lsb-release \
     xdg-utils \
- && rm -rf /var/lib/apt/lists/*
+ && rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*
 
 # Create and set working directory
 WORKDIR /usr/src/app
