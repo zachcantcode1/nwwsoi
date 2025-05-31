@@ -15,6 +15,10 @@ ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome
 RUN mkdir -p /home/pptruser/.cache/puppeteer \
     && chown -R pptruser:pptruser /home/pptruser/.cache
 
+# Create app directory structure
+RUN mkdir -p node_modules output logs \
+    && chown -R pptruser:pptruser /usr/src/app
+
 # Install application dependencies
 COPY nwws-xmpp-monitor/package*.json ./
 RUN npm ci --only=production
@@ -22,21 +26,17 @@ RUN npm ci --only=production
 # Copy application code
 COPY nwws-xmpp-monitor/ ./
 
-# Create directories for generated images and logs
-RUN mkdir -p output logs
-
 # Set environment for production
 ENV NODE_ENV=production
-
-# Run as non-root user
-RUN chown -R pptruser:pptruser /usr/src/app
-USER pptruser
 
 # Add cleanup
 RUN apt-get clean autoclean \
     && apt-get autoremove -y \
     && rm -rf /var/lib/apt/lists/* \
     && rm -rf /var/lib/{apt,dpkg,cache,log}/
+
+# Switch to non-root user
+USER pptruser
 
 # Change to the src directory
 WORKDIR /usr/src/app/src
