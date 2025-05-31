@@ -3,7 +3,10 @@
 FROM node:18-slim
 
 # Install dependencies required by Puppeteer
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends gnupg debian-archive-keyring && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends \
     ca-certificates \
     fonts-liberation \
     libatk-bridge2.0-0 \
