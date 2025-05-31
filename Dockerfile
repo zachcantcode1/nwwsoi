@@ -1,42 +1,24 @@
 # Dockerfile for NWWS-OI XMPP Monitor
 # Use Node.js 18 LTS bullseye slim image for smaller footprint
-FROM node:18-bullseye-slim
 
-# Set DEBIAN_FRONTEND to noninteractive to prevent interactive prompts
-ENV DEBIAN_FRONTEND=noninteractive
+# Builder stage
+FROM node:18-bullseye-slim AS builder
 
-# Set the working directory in the container
-WORKDIR /usr/src/app
-
-# Install minimal dependencies first to avoid disk space issues
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends ca-certificates && \
-    apt-get clean
-
-# Install remaining dependencies in smaller chunks
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends gnupg && \
-    apt-get clean
-
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends debian-archive-keyring && \
-    apt-get clean
-
-# Install Puppeteer dependencies in smaller groups
+# Install dependencies
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
+        ca-certificates \
+        gnupg \
+        debian-archive-keyring \
         libasound2 \
         libatk1.0-0 \
+        libatk-bridge-2.0-0 \
         libcairo2 \
         libgbm1 \
         libglib2.0-0 \
         libnspr4 \
         libnss3 \
         libpango-1.0-0 \
-    && apt-get clean
-
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
         libx11-6 \
         libxcb1 \
         libxcomposite1 \
@@ -50,10 +32,6 @@ RUN apt-get update && \
         libxrender1 \
         libxss1 \
         libxtst6 \
-    && apt-get clean
-
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
         fonts-liberation \
         libcups2 \
         libdbus-1-3 \
@@ -65,13 +43,9 @@ RUN apt-get update && \
         xdg-utils \
     && apt-get clean
 
-# Copy package.json and package-lock.json (if available)
+WORKDIR /usr/src/app
 COPY nwws-xmpp-monitor/package*.json ./
-
-# Install app dependencies
 RUN npm ci --only=production
-
-# Copy the rest of the application code from nwws-xmpp-monitor
 COPY nwws-xmpp-monitor/ ./
 
 # Create directories for generated images and logs
@@ -79,6 +53,11 @@ RUN mkdir -p output logs
 
 # Set environment for production
 ENV NODE_ENV=production
+
+# Final image
+FROM node:18-bullseye-slim
+COPY --from=builder /usr/src/app /usr/src/app
+WORKDIR /usr/src/app
 
 # Default command to start the XMPP monitor service
 CMD ["npm", "start"]
