@@ -22,6 +22,20 @@ RUN apt-get update && apt-get install -y \
     libxtst6 \
     libxkbcommon0 \
     libpango-1.0-0 \
+    libasound2 \
+    libexpat1 \
+    libfontconfig1 \
+    libgbm1 \
+    libglib2.0-0 \
+    libpangocairo-1.0-0 \
+    libx11-6 \
+    libxcb1 \
+    libxcursor1 \
+    libxext6 \
+    libxfixes3 \
+    libxi6 \
+    libxrender1 \
+    lsb-release \
     xdg-utils \
  && rm -rf /var/lib/apt/lists/*
 
