@@ -7,6 +7,14 @@ FROM ghcr.io/puppeteer/puppeteer:21.4.0
 # Set working directory
 WORKDIR /usr/src/app
 
+# Configure Puppeteer to use existing Chromium
+ENV PUPPETEER_SKIP_DOWNLOAD=true
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome
+
+# Create cache directory with proper permissions
+RUN mkdir -p /home/pptruser/.cache/puppeteer \
+    && chown -R pptruser:pptruser /home/pptruser/.cache
+
 # Install application dependencies
 COPY nwws-xmpp-monitor/package*.json ./
 RUN npm ci --only=production
