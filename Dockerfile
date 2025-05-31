@@ -20,5 +20,8 @@ RUN mkdir -p output logs
 # Set environment for production
 ENV NODE_ENV=production
 
+# Change to the src directory
+WORKDIR /usr/src/app/src
+
 # Run the application
-CMD [ "node", "app.js" ]
+CMD [ "node", "index.js" ]
