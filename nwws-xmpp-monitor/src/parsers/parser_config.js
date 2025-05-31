@@ -17,12 +17,15 @@ export const definitions = {
     // For simplicity, let's assume it ends with a newline or end of string for now.
     ugc_end_regexp: /\n|$/,
 
-    // VTEC Event Codes (Phenomena) - Example, needs to be comprehensive
+    // VTEC Event Codes (Phenomena)
     event_codes: {
         'SV': 'Severe Thunderstorm Warning',
         'TO': 'Tornado Warning',
         'FF': 'Flash Flood Warning',
-        // ... add all other relevant phenomena codes
+        'FA': 'Flood Advisory',
+        'FL': 'Flood Warning',
+        'MA': 'Marine Advisory',
+        'UP': 'Unknown Precipitation'
     },
 
     // VTEC Event Types (Significance) - Example, needs to be comprehensive
@@ -43,6 +46,20 @@ export const definitions = {
         // ... add all other relevant action codes
     },
 
+    // Allowed event codes (phenomena)
+    allowed_events: [
+        'SV', // Severe Thunderstorm Warning
+        'TO', // Tornado Warning
+        'FF', // Flash Flood Warning
+        'FL'  // Flood Warning
+    ],
+
+    // Event filtering method
+    shouldProcessEvent: function(eventCode) {
+        return this.allowed_events.includes(eventCode);
+    },
+
+    // Allowed event names
     allowed_event_names: [
         "Tornado Warning",
         "Severe Thunderstorm Warning",

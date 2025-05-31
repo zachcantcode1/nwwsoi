@@ -75,10 +75,12 @@ const handleIncomingMessage = async ({ rawText, id, stanza }) => {
                         console.error(`Index.js: Error reading image file ${imagePath} for alert ${id}:`, readError.message);
                     }
                 } else {
-                    console.log(`Index.js: Image generation failed or returned no path for alert ${id}.`);
+                    console.log(`Index.js: Image generation failed or returned no path for alert ${id}. Skipping webhook.`);
+                    return; // Skip sending webhook if no image is generated
                 }
             } catch (genError) {
                 console.error(`Index.js: Error during image generation for alert ${id}:`, genError.message ? genError.message : genError);
+                return; // Skip sending webhook if image generation fails
             }
         }
     } else if (category === 'storm_report') {
@@ -116,11 +118,12 @@ const handleIncomingMessage = async ({ rawText, id, stanza }) => {
                         // Decide if we should still send data if image reading fails
                     }
                 } else {
-                    console.log(`Index.js: Image generation failed or returned no path for storm report ${id}.`);
+                    console.log(`Index.js: Image generation failed or returned no path for storm report ${id}. Skipping webhook.`);
+                    return; // Skip sending webhook if no image is generated
                 }
             } catch (genError) {
                 console.error(`Index.js: Error during image generation for storm report ${id}:`, genError.message ? genError.message : genError);
-                // Consider if parsedData should still be sent to webhook if image generation fails
+                return; // Skip sending webhook if image generation fails
             }
         }
     } else {
@@ -173,10 +176,8 @@ const handleIncomingMessage = async ({ rawText, id, stanza }) => {
                 })
                 .catch(error => console.error('Index.js: Error sending multipart data to webhook for ID:', id, error.message ? error.message : error));
         } else {
-            // Send data without image if image wasn't generated or read (pass undefined for buffer and filename)
-            sendToWebhook(webhookUrl, dataToSend, undefined, undefined)
-                .then(() => console.log('Index.js: Successfully sent data (no image) to webhook for ID:', id))
-                .catch(error => console.error('Index.js: Error sending data (no image) to webhook for ID:', id, error.message ? error.message : error));
+            console.log('Index.js: No image generated or read. Skipping webhook.');
+            return; // Skip sending webhook if no image is generated or read
         }
     } else {
         console.log('Index.js: No parsed data to send for ID:', id);
