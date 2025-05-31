@@ -21,6 +21,7 @@ RUN apt-get update && apt-get install -y \
     libxss1 \
     libxtst6 \
     libxkbcommon0 \
+    libpango-1.0-0 \
     xdg-utils \
  && rm -rf /var/lib/apt/lists/*
 
