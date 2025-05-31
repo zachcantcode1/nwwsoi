@@ -11,10 +11,6 @@ WORKDIR /usr/src/app
 ENV PUPPETEER_SKIP_DOWNLOAD=true
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome
 
-# Create cache directory with proper permissions
-RUN mkdir -p /home/pptruser/.cache/puppeteer \
-    && chown -R pptruser:pptruser /home/pptruser/.cache
-
 # Create app directory structure
 RUN mkdir -p node_modules output logs \
     && chown -R pptruser:pptruser /usr/src/app
