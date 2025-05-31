@@ -25,7 +25,7 @@ COPY nwws-xmpp-monitor/ ./
 # Set environment for production
 ENV NODE_ENV=production
 
-# Add cleanup
+# Perform cleanup while still root
 RUN apt-get clean autoclean \
     && apt-get autoremove -y \
     && rm -rf /var/lib/apt/lists/* \
