@@ -149,6 +149,8 @@ export class ImageGeneratorService {
         // Use a more distinct message for this initial log
         this.logger.info(`[ImageGeneratorService Constructor] Logger initialized. Effective logger level: ${this.logger.level}. Passed logger level: ${loggerInstance ? loggerInstance.level : 'NOT PASSED'}`);
 
+        this.logger.debug('ImageGeneratorService v1.2 debug mode enabled');
+
         this.alertFrameCssPath = ALERT_FRAME_CSS_PATH; // Uses globally defined path
         this.logger.debug(`[ImageGeneratorService Constructor] ALERT_FRAME_CSS_PATH is: ${this.alertFrameCssPath}`);
 
