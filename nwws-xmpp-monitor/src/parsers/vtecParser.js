@@ -1,4 +1,4 @@
-import { definitions } from './parser_config.js';
+import definitions from './parser_config.js';
 
 export class VtecParser {
     constructor() {

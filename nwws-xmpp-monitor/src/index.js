@@ -19,10 +19,11 @@ import { XMPPClient } from './xmpp/client.js';
 import { categorizeMessage } from './categorizer/index.js';
 import { parseAlert } from './parsers/alertParser.js';
 import { parseStormReport } from './parsers/stormReportParser.js';
-import { definitions } from './parsers/parser_config.js';
 import { StormReportImageGeneratorService } from './stormReportImageGeneratorService.js';
 import { ImageGeneratorService as AlertImageGeneratorService } from './imageGeneratorService.js';
 import { sendToWebhook } from './webhook/sender.js';
+
+import definitions from './parsers/parser_config.js';
 
 // Instantiate services
 const stormReportImageService = new StormReportImageGeneratorService();
@@ -50,38 +51,50 @@ const handleIncomingMessage = async ({ rawText, id, stanza }) => {
     if (category === 'alert') {
         // Pass the rawText, id, and the found capAlertElement to the parser
         parsedData = parseAlert(rawText, id, capAlertElementForParser);
-        if (parsedData && parsedData.vtecEvent && parsedData.vtecEvent.eventName) {
-            if (!definitions.allowed_event_names.includes(parsedData.vtecEvent.eventName)) {
-                console.log(`Index.js: Event name "${parsedData.vtecEvent.eventName}" for ID ${id} is not in the allowed list. Skipping processing.`);
-                return; // Skip processing for this event
+        
+        if (parsedData && parsedData.event) {  
+            console.log(`Raw event name: "${parsedData.event}"`);
+            console.log(`Allowlist: ${JSON.stringify(definitions.allowed_events)}`);
+            
+            const eventName = parsedData.event.toLowerCase();
+            const allowedEvents = definitions.allowed_events.map(e => e.toLowerCase());
+            
+            console.log(`Normalized event: "${eventName}"`);
+            console.log(`Normalized allowlist: ${JSON.stringify(allowedEvents)}`);
+            
+            if (!allowedEvents.includes(eventName)) {
+                console.log(`Event "${parsedData.event}" is not allowed. Skipping.`);
+                return;
+            } else {
+                console.log(`Processing allowed event: ${parsedData.event}`);
             }
-            // Event name is allowed, proceed with image generation
-            parsedData.messageType = 'alert'; // Add messageType for alerts
-            try {
-                // Sanitize ID for use in filename
-                const sanitizedId = id.replace(/[^a-zA-Z0-9_.-]/g, '_');
-                // Note: alertImageService.generateImage internally creates a filename based on warningData.id
-                // It returns the full path to the image.
-                const imagePath = await alertImageService.generateImage(parsedData);
-                
-                if (imagePath) {
-                    console.log(`Index.js: Image generated for alert ${id} at ${imagePath}`);
-                    try {
-                        const imageBuffer = await fs.readFile(imagePath);
-                        parsedData.imageBuffer = imageBuffer;
-                        parsedData.imageFileName = path.basename(imagePath); // Extract filename from path
-                        parsedData.imagePath = imagePath; // Store full image path
-                    } catch (readError) {
-                        console.error(`Index.js: Error reading image file ${imagePath} for alert ${id}:`, readError.message);
-                    }
-                } else {
-                    console.log(`Index.js: Image generation failed or returned no path for alert ${id}. Skipping webhook.`);
-                    return; // Skip sending webhook if no image is generated
+        }
+        
+        parsedData.messageType = 'alert'; // Add messageType for alerts
+        try {
+            // Sanitize ID for use in filename
+            const sanitizedId = id.replace(/[^a-zA-Z0-9_.-]/g, '_');
+            // Note: alertImageService.generateImage internally creates a filename based on warningData.id
+            // It returns the full path to the image.
+            const imagePath = await alertImageService.generateImage(parsedData);
+            
+            if (imagePath) {
+                console.log(`Index.js: Image generated for alert ${id} at ${imagePath}`);
+                try {
+                    const imageBuffer = await fs.readFile(imagePath);
+                    parsedData.imageBuffer = imageBuffer;
+                    parsedData.imageFileName = path.basename(imagePath); // Extract filename from path
+                    parsedData.imagePath = imagePath; // Store full image path
+                } catch (readError) {
+                    console.error(`Index.js: Error reading image file ${imagePath} for alert ${id}:`, readError.message);
                 }
-            } catch (genError) {
-                console.error(`Index.js: Error during image generation for alert ${id}:`, genError.message ? genError.message : genError);
-                return; // Skip sending webhook if image generation fails
+            } else {
+                console.log(`Index.js: Image generation failed or returned no path for alert ${id}. Skipping webhook.`);
+                return; // Skip sending webhook if no image is generated
             }
+        } catch (genError) {
+            console.error(`Index.js: Error during image generation for alert ${id}:`, genError.message ? genError.message : genError);
+            return; // Skip sending webhook if image generation fails
         }
     } else if (category === 'storm_report') {
         parsedData = parseStormReport(rawText, id, capAlertElementForParser); // capAlertElementForParser will likely be null here

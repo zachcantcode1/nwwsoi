@@ -1,7 +1,7 @@
 import { RawParser } from './rawParser.js';
 import { VtecParser } from './vtecParser.js';
 import { UgcParser } from './ugcParser.js';
-import { definitions } from './parser_config.js'; // Added import
+import definitions from './parser_config.js'; // Fixed import
 
 const rawParser = new RawParser();
 const vtecParser = new VtecParser();

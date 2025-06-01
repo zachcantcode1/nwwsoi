@@ -1,4 +1,4 @@
-import { definitions } from './parser_config.js';
+import definitions from './parser_config.js';
 
 export class UgcParser {
     constructor() {
@@ -139,4 +139,3 @@ export class UgcParser {
 // console.log("UGC from message 1:", parser.getUgc(sampleMessage1));
 // console.log("UGC from message 2:", parser.getUgc(sampleMessage2));
 // console.log("UGC from message 3:", parser.getUgc(sampleMessage3));
-

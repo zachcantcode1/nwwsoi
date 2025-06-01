@@ -141,6 +141,7 @@ const NWS_EVENT_COLORS = {
 
 export class ImageGeneratorService {
     constructor(outputDir, loggerInstance) {
+        console.log('DEBUG: Running imageGeneratorService.js version 1.2');
         // Use derived __dirname_service for default output directory
         this.outputDir = outputDir || path.join(__dirname_service, '..', 'output');
         this.logger = loggerInstance || pino({ level: 'info', name: 'ImageGeneratorServiceInternalLogger' });
