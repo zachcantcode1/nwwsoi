@@ -327,7 +327,10 @@ export class ImageGeneratorService {
                 this.logger.warn('Timeout or error waiting for window.mapReady:', e.message);
             }
 
+            this.logger.debug(`Starting image generation for ${warningData.id}`);
             await page.screenshot({ path: imagePath, type: 'jpeg', quality: 85 });
+            this.logger.debug(`Rendered HTML map for ${warningData.id}`);
+            this.logger.debug(`Image created at ${imagePath}`);
 
             await page.waitForNetworkIdle({ idleTime: 500, timeout: 60000 });
 
@@ -354,8 +357,6 @@ export class ImageGeneratorService {
             });
             this.logger.debug({'[PUPPETEER RENDERED] Map Computed Styles': mapComputedStyles});
 
-            this.logger.debug('Taking screenshot...');
-            await page.screenshot({ path: imagePath, type: 'jpeg', quality: 85 });
             await browser.close();
             this.logger.info(`Successfully generated image: ${imagePath}`);
             return imagePath;
