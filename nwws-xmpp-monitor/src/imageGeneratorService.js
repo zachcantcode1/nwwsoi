@@ -273,7 +273,10 @@ export class ImageGeneratorService {
 
             // Convert polygon string to coordinate array if needed
             if (warningData.polygon && typeof warningData.polygon === 'string') {
+                this.logger.debug(`Converting polygon string: ${warningData.polygon.substring(0, 30)}...`);
                 warningData.polygon = this._parsePolygonString(warningData.polygon);
+                this.logger.debug(`Converted to array with ${warningData.polygon.length} points`);
+                this.logger.silly(`First 2 points: ${JSON.stringify(warningData.polygon.slice(0, 2))}`);
             }
 
             const templateData = {
@@ -358,6 +361,7 @@ export class ImageGeneratorService {
             return imagePath;
         } catch (error) {
             this.logger.error(`Error generating image for ${warningData.id}: ${error.message}`, { stack: error.stack });
+            this.logger.debug(`Error stack: ${error.stack}`);
             try {
                 if (await fs.stat(imagePath).catch(() => false)) {
                     await fs.unlink(imagePath);
