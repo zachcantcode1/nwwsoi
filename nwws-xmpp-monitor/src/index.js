@@ -66,7 +66,7 @@ const handleIncomingMessage = async ({ rawText, id, stanza }) => {
 
     if (category === 'alert') {
         // Pass the rawText, id, and the found capAlertElement to the parser
-        parsedData = parseAlert(rawText, id, capAlertElementForParser);
+        parsedData = parseAlert(rawText, id, capAlertElementForParser, logger);
 
         // If parseAlert returned null (e.g., for Cancel/Update messages, or other parse failures), stop processing
         if (!parsedData) {

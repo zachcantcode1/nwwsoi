@@ -9,7 +9,7 @@ const ugcParser = new UgcParser();
 
 // Helper to find CAP alert info
 // capAlertElement can be an @xmpp/xml Element or a JavaScript object from xml2js
-function parseCapAlertDetails(capAlertElement) {
+function parseCapAlertDetails(capAlertElement, logger) {
     if (!capAlertElement) return {};
 
     const details = {};
@@ -25,10 +25,10 @@ function parseCapAlertDetails(capAlertElement) {
         details.msgType = capAlertElement.msgType;
         details.scope = capAlertElement.scope;
 
-        // --- BEGIN DEBUG LOGGING (keep these for one more test run) --- 
-        console.log(`AlertParser (xml2js) DEBUG: capAlertElement received:`, JSON.stringify(capAlertElement, null, 2));
-        console.log(`AlertParser (xml2js) DEBUG: typeof capAlertElement.info:`, typeof capAlertElement.info);
-        console.log(`AlertParser (xml2js) DEBUG: capAlertElement.hasOwnProperty('info'):`, capAlertElement.hasOwnProperty('info'));
+        // --- BEGIN DEBUG LOGGING --- 
+        logger.debug({ capAlertElement }, `AlertParser (xml2js) DEBUG: capAlertElement received`);
+        logger.debug(`AlertParser (xml2js) DEBUG: typeof capAlertElement.info: ${typeof capAlertElement.info}`);
+        logger.debug(`AlertParser (xml2js) DEBUG: capAlertElement.hasOwnProperty('info'): ${capAlertElement.hasOwnProperty('info')}`);
         // --- END DEBUG LOGGING --- 
 
         // CAP spec allows multiple <info> blocks. xml2js default behavior (without explicitArray:false)
@@ -36,27 +36,27 @@ function parseCapAlertDetails(capAlertElement) {
         const infoBlocks = Array.isArray(capAlertElement.info) ? capAlertElement.info : [capAlertElement.info].filter(Boolean);
         
         if (infoBlocks.length === 0) {
-            console.log(`AlertParser (xml2js): No 'info' blocks found in capAlertElement.`);
+            logger.debug(`AlertParser (xml2js): No 'info' blocks found in capAlertElement.`);
         } else {
-            console.log(`AlertParser (xml2js): Processing ${infoBlocks.length} info block(s).`);
+            logger.debug(`AlertParser (xml2js): Processing ${infoBlocks.length} info block(s).`);
         }
 
         infoBlocks.forEach((infoData, index) => {
             if (!infoData) {
-                console.log(`AlertParser (xml2js): Info block at index ${index} is null/undefined, skipping.`);
+                logger.debug(`AlertParser (xml2js): Info block at index ${index} is null/undefined, skipping.`);
                 return;
             }
-            console.log(`AlertParser (xml2js): Processing info block ${index + 1}. Structure:`, JSON.stringify(infoData, null, 2));
+            logger.debug({ infoData: infoData }, `AlertParser (xml2js): Processing info block ${index + 1}.`);
 
             // Populate details from the first info block for simplicity for most fields, unless already populated
-            console.log(`AlertParser (xml2js) DEBUG: Before attempting to set senderName: details.senderName is '${details.senderName}', infoData.senderName is '${infoData.senderName}'`);
+            logger.debug(`AlertParser (xml2js) DEBUG: Before attempting to set senderName: details.senderName is '${details.senderName}', infoData.senderName is '${infoData.senderName}'`);
             if (!details.senderName && infoData.senderName) {
                 details.senderName = infoData.senderName;
-                console.log(`AlertParser (xml2js) DEBUG: Set details.senderName to '${details.senderName}' from infoData.`);
+                logger.debug(`AlertParser (xml2js) DEBUG: Set details.senderName to '${details.senderName}' from infoData.`);
             } else if (details.senderName) {
-                console.log(`AlertParser (xml2js) DEBUG: details.senderName ('${details.senderName}') already set, not overwriting from infoData.senderName ('${infoData.senderName}').`);
+                logger.debug(`AlertParser (xml2js) DEBUG: details.senderName ('${details.senderName}') already set, not overwriting from infoData.senderName ('${infoData.senderName}').`);
             } else if (!infoData.senderName) {
-                console.log(`AlertParser (xml2js) DEBUG: infoData.senderName is falsy ('${infoData.senderName}'), cannot set details.senderName.`);
+                logger.debug(`AlertParser (xml2js) DEBUG: infoData.senderName is falsy ('${infoData.senderName}'), cannot set details.senderName.`);
             }
 
             if (!details.event) details.event = infoData.event;
@@ -72,33 +72,33 @@ function parseCapAlertDetails(capAlertElement) {
 
             const areaBlocks = Array.isArray(infoData.area) ? infoData.area : [infoData.area].filter(Boolean);
             if (areaBlocks.length === 0) {
-                console.log(`AlertParser (xml2js): Info block ${index + 1} has no 'area' blocks.`);
+                logger.debug(`AlertParser (xml2js): Info block ${index + 1} has no 'area' blocks.`);
             } else {
-                console.log(`AlertParser (xml2js): Info block ${index + 1} has ${areaBlocks.length} area block(s).`);
+                logger.debug(`AlertParser (xml2js): Info block ${index + 1} has ${areaBlocks.length} area block(s).`);
             }
 
             areaBlocks.forEach((areaData, areaIndex) => {
                 if (!areaData) {
-                    console.log(`AlertParser (xml2js): Area block at index ${areaIndex} (info ${index+1}) is null/undefined, skipping.`);
+                    logger.debug(`AlertParser (xml2js): Area block at index ${areaIndex} (info ${index+1}) is null/undefined, skipping.`);
                     return;
                 }
-                console.log(`AlertParser (xml2js): Processing area block ${areaIndex + 1} from info block ${index + 1}. Structure:`, JSON.stringify(areaData, null, 2));
+                logger.debug({ areaData: areaData }, `AlertParser (xml2js): Processing area block ${areaIndex + 1} from info block ${index + 1}.`);
 
                 if (!details.areaDesc && areaData.areaDesc) details.areaDesc = areaData.areaDesc; // Take first areaDesc
                 
                 const polygonStrings = Array.isArray(areaData.polygon) ? areaData.polygon : [areaData.polygon].filter(Boolean);
                 if (polygonStrings.length === 0) {
-                    console.log(`AlertParser (xml2js): Area block ${areaIndex + 1} (info ${index+1}) has no 'polygon' strings.`);
+                    logger.debug(`AlertParser (xml2js): Area block ${areaIndex + 1} (info ${index+1}) has no 'polygon' strings.`);
                 } else {
-                    console.log(`AlertParser (xml2js): Area block ${areaIndex + 1} (info ${index+1}) has ${polygonStrings.length} polygon string(s).`);
+                    logger.debug(`AlertParser (xml2js): Area block ${areaIndex + 1} (info ${index+1}) has ${polygonStrings.length} polygon string(s).`);
                 }
 
                 polygonStrings.forEach(polyStr => {
                     if (polyStr && typeof polyStr === 'string') {
-                        console.log(`AlertParser (xml2js): Found polygon string: "${polyStr.substring(0,50)}..."`);
+                        logger.debug(`AlertParser (xml2js): Found polygon string: "${polyStr.substring(0,50)}..."`);
                         details.capPolygons.push(polyStr.trim());
                     } else {
-                        console.log(`AlertParser (xml2js): Encountered non-string or null polygon entry:`, polyStr);
+                        logger.warn({ alertId: id, polygonEntry: polyStr }, `AlertParser (xml2js): Encountered non-string or null polygon entry`);
                     }
                 });
             });
@@ -118,6 +118,7 @@ function parseCapAlertDetails(capAlertElement) {
 
     } else {
         // Handling for @xmpp/xml element (original logic)
+        logger.debug('AlertParser (@xmpp/xml): Using @xmpp/xml parsing path.');
         details.sender = capAlertElement.getChildText('sender');
         details.sent = capAlertElement.getChildText('sent');
         details.status = capAlertElement.getChildText('status');
@@ -125,9 +126,13 @@ function parseCapAlertDetails(capAlertElement) {
         details.scope = capAlertElement.getChildText('scope');
 
         const infoElements = capAlertElement.getChildren('info');
-        console.log(`AlertParser (xml2js): Processing ${infoElements.length} info block(s). First info block structure:`, JSON.stringify(infoElements[0], null, 2));
+        if (!infoElements || infoElements.length === 0) {
+            logger.debug(`AlertParser (@xmpp/xml): No 'info' elements found.`);
+        } else {
+            logger.debug(`AlertParser (@xmpp/xml): Processing ${infoElements.length} info element(s).`);
+        }
 
-        infoElements.forEach(infoElement => {
+        infoElements.forEach((infoElement, index) => {
             if (!infoElement) return;
             // Populate details from the first info block for simplicity for most fields
             if (!details.event) details.event = infoElement.getChildText('event');
@@ -142,8 +147,12 @@ function parseCapAlertDetails(capAlertElement) {
             if (!details.instruction) details.instruction = infoElement.getChildText('instruction');
 
             const areaElements = infoElement.getChildren('area');
-            console.log(`AlertParser (xml2js): Info block has ${areaElements.length} area block(s). First area block structure:`, JSON.stringify(areaElements[0], null, 2));
-            
+            if (!areaElements || areaElements.length === 0) {
+                logger.debug(`AlertParser (@xmpp/xml): Info element has no 'area' elements.`);
+            } else {
+                logger.debug(`AlertParser (@xmpp/xml): Info element has ${areaElements.length} area element(s).`);
+            }
+
             areaElements.forEach(areaElement => {
                 if (!areaElement) return;
                 if (!details.areaDesc && areaElement.getChildText('areaDesc')) details.areaDesc = areaElement.getChildText('areaDesc'); // Take first areaDesc
@@ -172,8 +181,8 @@ function parseCapAlertDetails(capAlertElement) {
     return details;
 }
 
-export function parseAlert(rawText, id, capAlertElement) {
-    console.log(`AlertParser: Parsing alert ID: ${id}`);
+export function parseAlert(rawText, id, capAlertElement, logger) {
+    logger.info(`AlertParser: Parsing alert ID: ${id}`);
     const alertData = {
         id,
         source: 'nwws-oi',
@@ -191,18 +200,18 @@ export function parseAlert(rawText, id, capAlertElement) {
         
         // CAP XML specific parsing
         // capAlertElement is now either an @xmpp/xml Element or the JS object from xml2js
-        const capDetails = parseCapAlertDetails(capAlertElement);
+        const capDetails = parseCapAlertDetails(capAlertElement, logger);
         alertData.cap = capDetails;
 
         // Skip if message type is Cancel or Update
         if (alertData.cap && alertData.cap.msgType) {
             const msgTypeLower = alertData.cap.msgType.toLowerCase();
             if (msgTypeLower === 'cancel') {
-                console.log(`AlertParser: Skipping alert ID ${id} because it's a 'Cancel' message.`);
+                logger.info(`AlertParser: Skipping alert ID ${id} because it's a 'Cancel' message.`);
                 return null;
             }
             if (msgTypeLower === 'update') {
-                console.log(`AlertParser: Skipping alert ID ${id} because it's an 'Update' message.`);
+                logger.info(`AlertParser: Skipping alert ID ${id} because it's an 'Update' message.`);
                 return null;
             }
         }
@@ -213,7 +222,7 @@ export function parseAlert(rawText, id, capAlertElement) {
         // Attempt to get polygon from CAP details first
         if (capDetails.capPolygons && capDetails.capPolygons.length > 0) {
             const firstPolygonString = capDetails.capPolygons[0]; // Using the first polygon
-            console.log(`AlertParser: Found CAP polygon string for ${id}: ${firstPolygonString.substring(0,100)}...`);
+            logger.info(`AlertParser: Found CAP polygon string for ${id}: ${firstPolygonString.substring(0,100)}...`);
             try {
                 const coordinatePairs = firstPolygonString.split(' ').map(pairStr => {
                     const parts = pairStr.split(',');
@@ -233,18 +242,18 @@ export function parseAlert(rawText, id, capAlertElement) {
                         type: "Polygon",
                         coordinates: [coordinatePairs] // GeoJSON Polygon coordinates are an array of linear rings
                     };
-                    console.log(`AlertParser: Successfully parsed CAP polygon for ${id}.`);
+                    logger.info(`AlertParser: Successfully parsed CAP polygon for ${id}.`);
                 } else {
-                    console.warn(`AlertParser: CAP polygon string for ${id} resulted in insufficient coordinate pairs after parsing: ${coordinatePairs.length}`);
+                    logger.warn(`AlertParser: CAP polygon string for ${id} resulted in insufficient coordinate pairs after parsing: ${coordinatePairs.length}`);
                 }
             } catch (e) {
-                console.error(`AlertParser: Error parsing CAP polygon string for ${id}: "${firstPolygonString}"`, e);
+                logger.error({ alertId: id, error: e.message, stack: e.stack }, `AlertParser: Error parsing CAP polygon string for ${id}: "${firstPolygonString}"`);
             }
         }
 
         // Fallback to raw text parsing if CAP polygon wasn't found or was invalid
         if (!alertData.geometry) {
-            console.log(`AlertParser: No valid CAP polygon for ${id}, trying raw text regex parser.`);
+            logger.info(`AlertParser: No valid CAP polygon for ${id}, trying raw text regex parser.`);
             const polygonFromRaw = rawParser.getPolygonCoordinatesByText(rawText);
             if (polygonFromRaw && polygonFromRaw.length > 0) {
                 alertData.geometry = {
@@ -267,15 +276,15 @@ export function parseAlert(rawText, id, capAlertElement) {
 
         // Check if the event should be ignored
         if (alertData.event && definitions.ignored_event_names && definitions.ignored_event_names.includes(alertData.event)) {
-            console.log(`AlertParser: Event "${alertData.event}" for ID ${id} is in the ignore list. Skipping.`);
+            logger.info(`AlertParser: Event "${alertData.event}" for ID ${id} is in the ignore list. Skipping.`);
             return null; // Indicate that this alert should be ignored
         }
 
     } catch (error) {
-        console.error(`AlertParser: Error parsing alert ${id}:`, error);
+        logger.error({ alertId: id, error: error.message, stack: error.stack }, `AlertParser: Error parsing alert ID ${id}`);
         alertData.error = error.message;
     }
 
-    // console.log(`AlertParser: Parsed data for ${id}:`, JSON.stringify(alertData, null, 2));
+    // logger.info(`AlertParser: Parsed data for ${id}:`, JSON.stringify(alertData, null, 2));
     return alertData;
 }
