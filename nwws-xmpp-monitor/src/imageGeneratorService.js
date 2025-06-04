@@ -722,14 +722,16 @@ export class ImageGeneratorService {
                 hour: 'numeric', 
                 minute: '2-digit', 
                 hour12: true, 
-                timeZoneName: 'short' 
+                timeZoneName: 'short', 
+                timeZone: 'America/Chicago' 
             });
             
             const datePart = dateObj.toLocaleDateString('en-US', { 
                 weekday: 'short', 
                 month: 'short', 
                 day: 'numeric', 
-                year: 'numeric' 
+                year: 'numeric', 
+                timeZone: 'America/Chicago' 
             });
             
             return `${timePart} ${datePart}`; 
