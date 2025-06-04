@@ -132,8 +132,13 @@ const handleIncomingMessage = async ({ rawText, id, stanza }) => {
             return; // Skip sending webhook if image generation fails
         }
     } else if (category === 'storm_report') {
-        parsedData = parseStormReport(rawText, id, capAlertElementForParser); // capAlertElementForParser will likely be null here
+        parsedData = parseStormReport(rawText, id, logger); // Pass logger
         if (parsedData) {
+            // Filter out LSRs with summary "Rain"
+            if (parsedData.summary === 'Rain') {
+                logger.info(`Index.js: Skipping Local Storm Report ID ${id} because summary is 'Rain'.`);
+                return;
+            }
             parsedData.messageType = 'storm_report'; // Add messageType for storm reports
             try {
                 // Sanitize ID for use in filename (replace non-alphanumeric characters except ., _, -)
