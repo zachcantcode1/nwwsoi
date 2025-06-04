@@ -30,7 +30,7 @@ const NWS_EVENT_COLORS = {
     "tornado warning": "#FF0000",
     "extreme wind warning": "#FF8C00",
     "severe thunderstorm warning": "#FFBF00", // Changed from #FFA500
-    "flash flood warning": "#E60000", // Changed from #8B0000
+    "flash flood warning": "#00FF00", // Changed to match Flood Warning
     "flash flood statement": "#E60000", // Also update statement to match warning
     "severe weather statement": "#00FFFF",
     "shelter in place warning": "#FA8072",
@@ -233,8 +233,17 @@ export class ImageGeneratorService {
         const imagePath = path.join(this.outputDir, imageFileName);
 
         try {
-            const eventType = warningData.event || warningData.cap?.event || 'Unknown Event';
-            const warningColor = this._getWarningColor(eventType);
+            let eventType = warningData.event || warningData.cap?.event || 'Unknown Event'; // Changed to let
+
+            // Check for 'Tornado Possible' in Severe Thunderstorm Warnings
+            if (eventType.toLowerCase() === 'severe thunderstorm warning') {
+                const description = warningData.description || "";
+                if (description.toLowerCase().includes('possible tornadoes')) {
+                    eventType += ' (Tornado Possible)';
+                }
+            }
+
+            const warningColor = this._getWarningColor(eventType.split(' (')[0]); // Use base event type for color
             const expires = this._formatExpiresTime(warningData.cap?.expires); // Renamed from formattedExpires
             const affectedAreas = this._extractAffectedAreas(warningData);
             const hazards = this._extractHazardsFromDescription(warningData);
@@ -294,7 +303,8 @@ export class ImageGeneratorService {
                 affectedAreas,
                 hazards,
                 issuingOffice,
-                magnitude: warningData.magnitude
+                magnitude: warningData.magnitude,
+                capParameters: warningData.cap?.parameters // Pass raw CAP parameters
             };
             const htmlContent = await this._getHtmlForPuppeteer(templateData);
 
@@ -402,7 +412,8 @@ export class ImageGeneratorService {
             mapCenter,      // Expecting this to be an array like [lat, lon]
             mapZoom,        // Expecting this to be a number
             insetMapZoom,   // Expecting this to be a number
-            magnitude
+            magnitude,
+            capParameters   // Destructure capParameters
         } = data;
 
         const cssContent = await this._loadCssContent();
@@ -411,17 +422,35 @@ export class ImageGeneratorService {
         let windValue = "N/A";
         let hailValue = "N/A";
 
-        if (hazards) {
-            // Try to find wind speed (e.g., "60 MPH" or "60mph")
-            const windMatch = hazards.match(/(\d+(\.\d+)?)\s*M?P?H?/i);
+        // Prioritize MaxWindGust from capParameters if available
+        if (capParameters && Array.isArray(capParameters)) {
+            const maxWindGustParam = capParameters.find(p => p.valueName?.toLowerCase() === 'maxwindgust');
+            if (maxWindGustParam && maxWindGustParam.value) {
+                // Assuming the value from MaxWindGust is already in MPH and doesn't need conversion here
+                windValue = parseFloat(maxWindGustParam.value).toFixed(0) + " MPH"; 
+            }
+        }
+
+        // Fallback or if MaxWindGust wasn't found, try parsing from hazards string
+        if (windValue === "N/A" && hazards) {
+            const windMatch = hazards.match(/(\d+(\.\d+)?)\s*MPH/i);
             if (windMatch && windMatch[1]) {
                 windValue = windMatch[1] + " MPH";
             }
+        }
 
-            // Try to find hail size (e.g., "1.00 inches" or "1.00 inch")
+        // Hail parsing (remains the same, but check capParameters first for consistency if desired in future)
+        if (capParameters && Array.isArray(capParameters)) {
+            const maxHailSizeParam = capParameters.find(p => p.valueName?.toLowerCase() === 'maxhailsize');
+            if (maxHailSizeParam && maxHailSizeParam.value) {
+                hailValue = parseFloat(maxHailSizeParam.value).toFixed(2) + " IN";
+            }
+        }
+        
+        if (hailValue === "N/A" && hazards) {
             const hailMatch = hazards.match(/(\d+(\.\d+)?)\s*INCH(ES)?/i);
             if (hailMatch && hailMatch[1]) {
-                hailValue = hailMatch[1] + " IN"; // Using IN for brevity in the card
+                hailValue = hailMatch[1] + " IN";
             }
         }
         this.logger.debug(`Parsed hazards - Wind: ${windValue}, Hail: ${hailValue}`);

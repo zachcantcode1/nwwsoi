@@ -194,6 +194,19 @@ export function parseAlert(rawText, id, capAlertElement) {
         const capDetails = parseCapAlertDetails(capAlertElement);
         alertData.cap = capDetails;
 
+        // Skip if message type is Cancel or Update
+        if (alertData.cap && alertData.cap.msgType) {
+            const msgTypeLower = alertData.cap.msgType.toLowerCase();
+            if (msgTypeLower === 'cancel') {
+                console.log(`AlertParser: Skipping alert ID ${id} because it's a 'Cancel' message.`);
+                return null;
+            }
+            if (msgTypeLower === 'update') {
+                console.log(`AlertParser: Skipping alert ID ${id} because it's an 'Update' message.`);
+                return null;
+            }
+        }
+
         // Initialize geometry as null
         alertData.geometry = null;
 

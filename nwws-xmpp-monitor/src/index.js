@@ -2,6 +2,7 @@ import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs/promises'; // Added for readFile
+import pino from 'pino';
 
 // Determine the directory of the current module
 const __filename = fileURLToPath(import.meta.url);
@@ -11,9 +12,24 @@ const __dirname = path.dirname(__filename);
 const envPath = path.resolve(__dirname, '../.env');
 dotenv.config({ path: envPath });
 
-console.log('Attempting to load .env from:', envPath); // Debugging line
-console.log('XMPP_SERVER in index.js after dotenv.config():', process.env.XMPP_SERVER); // Debugging line
-console.log('XMPP_USER in index.js after dotenv.config():', process.env.XMPP_USER); // Debugging line
+// Initialize Pino logger with pino-roll transport
+const transport = pino.transport({
+  target: 'pino-roll',
+  options: {
+    file: path.join(__dirname, '..', 'logs', 'app.log'), // Log file path
+    frequency: 'daily',         // Rotate daily
+    size: '20m',                // Rotate if file exceeds 20MB
+    limit: { count: 7 },        // Keep current log + 7 old ones
+    mkdir: true,                // Create log directory if it doesn't exist
+    symlink: true               // Create a 'current.log' symlink
+  }
+});
+
+const logger = pino(transport);
+
+logger.info('Attempting to load .env from:', envPath);
+logger.info('XMPP_SERVER in index.js after dotenv.config():', process.env.XMPP_SERVER);
+logger.info('XMPP_USER in index.js after dotenv.config():', process.env.XMPP_USER);
 
 import { XMPPClient } from './xmpp/client.js';
 import { categorizeMessage } from './categorizer/index.js';
@@ -31,7 +47,7 @@ const alertImageService = new AlertImageGeneratorService();
 
 // Define the message handling function
 const handleIncomingMessage = async ({ rawText, id, stanza }) => {
-    console.log('Index.js: Received raw message for processing:', rawText ? rawText.substring(0, 100) + "..." : "undefined", 'ID:', id);
+    logger.info('Index.js: Received raw message for processing:', rawText ? rawText.substring(0, 100) + "..." : "undefined", 'ID:', id);
 
     // The `stanza` object from @xmpp/client is an instance of an XML Element.
     // We can pass it to the categorizer and parsers.
@@ -53,20 +69,20 @@ const handleIncomingMessage = async ({ rawText, id, stanza }) => {
         parsedData = parseAlert(rawText, id, capAlertElementForParser);
         
         if (parsedData && parsedData.event) {  
-            console.log(`Raw event name: "${parsedData.event}"`);
-            console.log(`Allowlist: ${JSON.stringify(definitions.allowed_events)}`);
+            logger.info(`Raw event name: "${parsedData.event}"`);
+            logger.info(`Allowlist: ${JSON.stringify(definitions.allowed_events)}`);
             
             const eventName = parsedData.event.toLowerCase();
             const allowedEvents = definitions.allowed_events.map(e => e.toLowerCase());
             
-            console.log(`Normalized event: "${eventName}"`);
-            console.log(`Normalized allowlist: ${JSON.stringify(allowedEvents)}`);
+            logger.info(`Normalized event: "${eventName}"`);
+            logger.info(`Normalized allowlist: ${JSON.stringify(allowedEvents)}`);
             
             if (!allowedEvents.includes(eventName)) {
-                console.log(`Event "${parsedData.event}" is not allowed. Skipping.`);
+                logger.info(`Event "${parsedData.event}" is not allowed. Skipping.`);
                 return;
             } else {
-                console.log(`Processing allowed event: ${parsedData.event}`);
+                logger.info(`Processing allowed event: ${parsedData.event}`);
             }
         }
         
@@ -79,21 +95,21 @@ const handleIncomingMessage = async ({ rawText, id, stanza }) => {
             const imagePath = await alertImageService.generateImage(parsedData);
             
             if (imagePath) {
-                console.log(`Index.js: Image generated for alert ${id} at ${imagePath}`);
+                logger.info(`Index.js: Image generated for alert ${id} at ${imagePath}`);
                 try {
                     const imageBuffer = await fs.readFile(imagePath);
                     parsedData.imageBuffer = imageBuffer;
                     parsedData.imageFileName = path.basename(imagePath); // Extract filename from path
                     parsedData.imagePath = imagePath; // Store full image path
                 } catch (readError) {
-                    console.error(`Index.js: Error reading image file ${imagePath} for alert ${id}:`, readError.message);
+                    logger.error(`Index.js: Error reading image file ${imagePath} for alert ${id}:`, readError.message);
                 }
             } else {
-                console.log(`Index.js: Image generation failed or returned no path for alert ${id}. Skipping webhook.`);
+                logger.info(`Index.js: Image generation failed or returned no path for alert ${id}. Skipping webhook.`);
                 return; // Skip sending webhook if no image is generated
             }
         } catch (genError) {
-            console.error(`Index.js: Error during image generation for alert ${id}:`, genError.message ? genError.message : genError);
+            logger.error(`Index.js: Error during image generation for alert ${id}:`, genError.message ? genError.message : genError);
             return; // Skip sending webhook if image generation fails
         }
     } else if (category === 'storm_report') {
@@ -104,43 +120,31 @@ const handleIncomingMessage = async ({ rawText, id, stanza }) => {
                 // Sanitize ID for use in filename (replace non-alphanumeric characters except ., _, -)
                 const sanitizedId = id.replace(/[^a-zA-Z0-9_.-]/g, '_');
                 const stormReportImageFileName = `storm_report_${sanitizedId}_${Date.now()}.png`;
-                console.log(`Index.js: Attempting to generate image for storm report ${id} with filename ${stormReportImageFileName}`);
+                logger.info(`Index.js: Attempting to generate image for storm report ${id} with filename ${stormReportImageFileName}`);
                 
-                // NOTE: This call will likely fail or produce unexpected results until
-                // stormReportImageGeneratorService.js is adapted for storm report data structure and point mapping.
                 const imagePath = await stormReportImageService.generateMapImage(parsedData, stormReportImageFileName);
                 
                 if (imagePath) {
-                    console.log(`Index.js: Image generated for storm report ${id} at ${imagePath}`);
-                    // Read the image file into a buffer
+                    logger.info(`Index.js: Image generated for storm report ${id} at ${imagePath}`);
                     try {
                         const imageBuffer = await fs.readFile(imagePath);
-                        // We will pass parsedData, imageBuffer, and stormReportImageFileName to sendToWebhook
-                        // The actual call to sendToWebhook will be updated in the next step after modifying sender.js
-                        // For now, let's assume sendToWebhook will handle these new arguments.
-                        // This is a placeholder for the actual modification to the sendToWebhook call:
-                        // await sendToWebhook(webhookUrl, parsedData, imageBuffer, stormReportImageFileName);
-                        // The actual modification of the sendToWebhook call will happen after sender.js is updated.
-                        // For now, we'll keep the existing call but acknowledge the data is ready.
-                        parsedData.imageBuffer = imageBuffer; // Temporarily store buffer here for now
-                        parsedData.imageFileName = stormReportImageFileName; // And filename
-                        parsedData.imagePath = imagePath; // Store full image path
-
+                        parsedData.imageBuffer = imageBuffer; 
+                        parsedData.imageFileName = stormReportImageFileName; 
+                        parsedData.imagePath = imagePath; 
                     } catch (readError) {
-                        console.error(`Index.js: Error reading image file ${imagePath} for storm report ${id}:`, readError.message);
-                        // Decide if we should still send data if image reading fails
+                        logger.error(`Index.js: Error reading image file ${imagePath} for storm report ${id}:`, readError.message);
                     }
                 } else {
-                    console.log(`Index.js: Image generation failed or returned no path for storm report ${id}. Skipping webhook.`);
+                    logger.info(`Index.js: Image generation failed or returned no path for storm report ${id}. Skipping webhook.`);
                     return; // Skip sending webhook if no image is generated
                 }
             } catch (genError) {
-                console.error(`Index.js: Error during image generation for storm report ${id}:`, genError.message ? genError.message : genError);
+                logger.error(`Index.js: Error during image generation for storm report ${id}:`, genError.message ? genError.message : genError);
                 return; // Skip sending webhook if image generation fails
             }
         }
     } else {
-        console.log('Index.js: Unknown message category:', category);
+        logger.info('Index.js: Unknown message category:', category);
         return; // Return early if category is unknown
     }
 
@@ -154,79 +158,69 @@ const handleIncomingMessage = async ({ rawText, id, stanza }) => {
             const isRelevantUgc = messageUgcZones.some(zone => allowedUgcCodes.includes(zone));
 
             if (!isRelevantUgc) {
-                console.log(`Index.js: Message ID ${id} filtered out by UGC. Zones: [${messageUgcZones.join(', ')}]. Allowed: [${allowedUgcCodes.join(', ')}]. Not sending to webhook.`);
+                logger.info(`Index.js: Message ID ${id} filtered out by UGC. Zones: [${messageUgcZones.join(', ')}]. Allowed: [${allowedUgcCodes.join(', ')}]. Not sending to webhook.`);
                 return; // Stop processing this message
             }
-            console.log(`Index.js: Message ID ${id} matched UGC filter or no filter active. Zones: [${messageUgcZones.join(', ')}]. Proceeding.`);
+            logger.info(`Index.js: Message ID ${id} matched UGC filter or no filter active. Zones: [${messageUgcZones.join(', ')}]. Proceeding.`);
         } else if (ugcFilterCodesEnv) {
-            // Filter is set, but message has no UGC or zones. Depending on desired behavior,
-            // you might want to filter these out or let them pass.
-            // Current logic: if filter is set and message has no UGC, it passes.
-            // To filter out messages without UGC when a filter is active:
-            // console.log(`Index.js: Message ID ${id} has no UGC zones, but UGC filter is active. Filtering out.`);
+            // logger.info(`Index.js: Message ID ${id} has no UGC zones, but UGC filter is active. Filtering out.`);
             // return;
         }
 
         const webhookUrl = process.env.WEBHOOK_URL;
         if (!webhookUrl) {
-            console.error("WEBHOOK_URL is not defined in .env file. Cannot send data.");
+            logger.error("WEBHOOK_URL is not defined in .env file. Cannot send data.");
             return;
         }
 
-        // Prepare for updated sendToWebhook call
         const { imageBuffer, imageFileName, imagePath: localImagePath, ...dataToSend } = parsedData;
 
         if (imageBuffer && imageFileName) {
-            // Call sendToWebhook with separate arguments for JSON data, image buffer, and image filename
             sendToWebhook(webhookUrl, dataToSend, imageBuffer, imageFileName)
                 .then(() => {
-                    console.log('Index.js: Successfully sent multipart data to webhook for ID:', id);
-                    if (localImagePath) { // Check if localImagePath was defined (i.e., an image was processed)
+                    logger.info('Index.js: Successfully sent multipart data to webhook for ID:', id);
+                    if (localImagePath) { 
                         fs.unlink(localImagePath)
-                            .then(() => console.log(`Index.js: Successfully deleted image ${localImagePath}`))
-                            .catch(err => console.error(`Index.js: Error deleting image ${localImagePath}:`, err.message));
+                            .then(() => logger.info(`Index.js: Successfully deleted image ${localImagePath}`))
+                            .catch(err => logger.error(`Index.js: Error deleting image ${localImagePath}:`, err.message));
                     }
                 })
-                .catch(error => console.error('Index.js: Error sending multipart data to webhook for ID:', id, error.message ? error.message : error));
+                .catch(error => logger.error('Index.js: Error sending multipart data to webhook for ID:', id, error.message ? error.message : error));
         } else {
-            console.log('Index.js: No image generated or read. Skipping webhook.');
-            return; // Skip sending webhook if no image is generated or read
+            logger.info('Index.js: No image generated or read. Skipping webhook.');
+            return; 
         }
     } else {
-        console.log('Index.js: No parsed data to send for ID:', id);
+        logger.info('Index.js: No parsed data to send for ID:', id);
     }
 };
 
-// Instantiate XMPPClient and pass the message handler
-console.log('Instantiating XMPPClient...');
-const xmppClientInstance = new XMPPClient(handleIncomingMessage);
-console.log('XMPPClient instance created:', xmppClientInstance ? 'OK' : 'Failed');
-console.log('typeof xmppClientInstance.connect:', typeof xmppClientInstance?.connect);
+logger.info('Instantiating XMPPClient...');
+const xmppClientInstance = new XMPPClient(handleIncomingMessage, logger); // Pass logger to XMPPClient if it supports/needs it
+logger.info('XMPPClient instance created:', xmppClientInstance ? 'OK' : 'Failed');
+logger.info('typeof xmppClientInstance.connect:', typeof xmppClientInstance?.connect);
 
-// Connect to the XMPP server
-console.log('Calling xmppClientInstance.connect()...');
+logger.info('Calling xmppClientInstance.connect()...');
 const connectPromise = xmppClientInstance.connect();
 
 if (connectPromise && typeof connectPromise.then === 'function') {
     connectPromise.then(() => {
-        console.log('Index.js: XMPP client connect() promise resolved. Connection process likely successful or ongoing (check XMPPClient logs).');
+        logger.info('Index.js: XMPP client connect() promise resolved. Connection process likely successful or ongoing (check XMPPClient logs).');
     })
         .catch(error => {
-            console.error('Index.js: Failed to connect XMPP client (connect() promise rejected):', error.message ? error.message : error);
-            // process.exit(1); // Consider if exit is appropriate or if reconnect logic handles it
+            logger.error('Index.js: Failed to connect XMPP client (connect() promise rejected):', error.message ? error.message : error);
         });
 } else {
-    console.error('FATAL: xmppClientInstance.connect() did not return a Promise. Check XMPPClient implementation.');
+    logger.error('FATAL: xmppClientInstance.connect() did not return a Promise. Check XMPPClient implementation.');
     process.exit(1);
 }
 
-// Graceful shutdown
 async function shutdown() {
-    console.log('Initiating graceful shutdown...');
+    logger.info('Initiating graceful shutdown...');
     if (xmppClientInstance) {
         await xmppClientInstance.disconnect();
     }
-    console.log('Shutdown complete.');
+    logger.info('Shutdown complete.');
     process.exit(0);
 }
 
