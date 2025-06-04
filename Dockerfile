@@ -24,6 +24,7 @@ COPY nwws-xmpp-monitor/ ./
 
 # Set environment for production
 ENV NODE_ENV=production
+ENV LOG_TARGET=stdout
 
 # Switch to non-root user
 USER pptruser

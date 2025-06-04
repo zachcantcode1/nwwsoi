@@ -52,7 +52,6 @@ export default {
     "Severe Thunderstorm Warning",
     "Flash Flood Warning",
     "Flood Warning",
-    "Special Weather Statement"
   ],
 
   // Event filtering method

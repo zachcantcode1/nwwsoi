@@ -12,20 +12,33 @@ const __dirname = path.dirname(__filename);
 const envPath = path.resolve(__dirname, '../.env');
 dotenv.config({ path: envPath });
 
-// Initialize Pino logger with pino-roll transport
-const transport = pino.transport({
-  target: 'pino-roll',
-  options: {
-    file: path.join(__dirname, '..', 'logs', 'app.log'), // Log file path
-    frequency: 'daily',         // Rotate daily
-    size: '20m',                // Rotate if file exceeds 20MB
-    limit: { count: 7 },        // Keep current log + 7 old ones
-    mkdir: true,                // Create log directory if it doesn't exist
-    symlink: true               // Create a 'current.log' symlink
-  }
-});
+// Initialize Pino logger conditionally
+let logger;
+const logTarget = process.env.LOG_TARGET || 'file'; // Default to file logging
 
-const logger = pino(transport);
+if (logTarget === 'stdout') {
+    logger = pino({
+        level: process.env.LOG_LEVEL || 'info', // Default to 'info', can be overridden
+        // Pino defaults to 'info' level, and NODE_ENV=production also suggests 'info'.
+        // Add any other pino options for stdout logging here if needed.
+    });
+    logger.info('Logger initialized to write to STDOUT.');
+} else { // 'file' or any other value defaults to file logging with pino-roll
+    const logsDir = path.join(__dirname, '..', 'logs');
+    const transport = pino.transport({
+        target: 'pino-roll',
+        options: {
+            file: path.join(logsDir, 'app.log'),
+            frequency: 'daily',
+            size: '20m',
+            limit: { count: 7 },
+            mkdir: true,
+            symlink: path.join(logsDir, 'current.log') // Ensure symlink is also in logsDir
+        }
+    });
+    logger = pino(transport);
+    logger.info(`Logger initialized to write to file (pino-roll). LOG_TARGET=${logTarget}. Log path: ${path.join(logsDir, 'app.log')}`);
+}
 
 logger.info('Attempting to load .env from:', envPath);
 logger.info('XMPP_SERVER in index.js after dotenv.config():', process.env.XMPP_SERVER);
