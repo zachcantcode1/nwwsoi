@@ -173,22 +173,18 @@ const handleIncomingMessage = async ({ rawText, id, stanza }) => {
     }
 
     if (parsedData) {
-        // UGC Filtering Logic
-        const ugcFilterCodesEnv = process.env.UGC_FILTER_CODES;
-        if (ugcFilterCodesEnv && parsedData.ugc && parsedData.ugc.zones && parsedData.ugc.zones.length > 0) {
-            const allowedUgcCodes = ugcFilterCodesEnv.split(',').map(code => code.trim().toUpperCase());
-            const messageUgcZones = parsedData.ugc.zones.map(zone => zone.toUpperCase());
-
-            const isRelevantUgc = messageUgcZones.some(zone => allowedUgcCodes.includes(zone));
-
-            if (!isRelevantUgc) {
-                logger.info(`Index.js: Message ID ${id} filtered out by UGC. Zones: [${messageUgcZones.join(', ')}]. Allowed: [${allowedUgcCodes.join(', ')}]. Not sending to webhook.`);
+        // UGC Filtering Logic using parser_config.js
+        if (definitions.allowed_ugc_codes && definitions.allowed_ugc_codes.length > 0) {
+            // parsedData.ugc is the object { zones: [...] } or null, which is what shouldProcessUgc expects
+            if (!definitions.shouldProcessUgc(parsedData.ugc)) {
+                const messageUgcZonesText = parsedData.ugc && parsedData.ugc.zones && parsedData.ugc.zones.length > 0 ? parsedData.ugc.zones.join(', ') : 'none';
+                logger.info(`Index.js: Message ID ${id} filtered out by UGC. Alert Zones: [${messageUgcZonesText}]. Allowed Config Zones: [${definitions.allowed_ugc_codes.join(', ')}]. Not sending to webhook.`);
                 return; // Stop processing this message
             }
-            logger.info(`Index.js: Message ID ${id} matched UGC filter or no filter active. Zones: [${messageUgcZones.join(', ')}]. Proceeding.`);
-        } else if (ugcFilterCodesEnv) {
-            // logger.info(`Index.js: Message ID ${id} has no UGC zones, but UGC filter is active. Filtering out.`);
-            // return;
+            const messageUgcZonesText = parsedData.ugc && parsedData.ugc.zones && parsedData.ugc.zones.length > 0 ? parsedData.ugc.zones.join(', ') : 'none';
+            logger.info(`Index.js: Message ID ${id} matched UGC filter. Alert Zones: [${messageUgcZonesText}]. Proceeding.`);
+        } else {
+            logger.info(`Index.js: No UGC codes defined in parser_config.allowed_ugc_codes or list is empty. Skipping UGC filtering for message ID ${id}.`);
         }
 
         const webhookUrl = process.env.WEBHOOK_URL;
