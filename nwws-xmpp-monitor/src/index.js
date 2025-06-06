@@ -86,6 +86,20 @@ const handleIncomingMessage = async ({ rawText, id, stanza }) => {
             // alertParser.js should have already logged the reason for returning null (if it's a Cancel/Update)
             return;
         }
+
+        // UGC Filtering Logic for 'alert' category
+        if (definitions.allowed_ugc_codes && definitions.allowed_ugc_codes.length > 0) {
+            if (!definitions.shouldProcessUgc(parsedData.ugc)) { // parsedData.ugc should exist for alerts
+                const messageUgcZonesText = parsedData.ugc && parsedData.ugc.zones && parsedData.ugc.zones.length > 0 ? parsedData.ugc.zones.join(', ') : 'none';
+                logger.info(`Index.js: Message ID ${id} (Alert) filtered out by UGC. Alert Zones: [${messageUgcZonesText}]. Allowed Config Zones: [${definitions.allowed_ugc_codes.join(', ')}]. Not processing further.`);
+                return; // Stop processing this alert
+            }
+            const messageUgcZonesText = parsedData.ugc && parsedData.ugc.zones && parsedData.ugc.zones.length > 0 ? parsedData.ugc.zones.join(', ') : 'none';
+            logger.info(`Index.js: Message ID ${id} (Alert) matched UGC filter. Alert Zones: [${messageUgcZonesText}]. Proceeding with event name check.`);
+        } else {
+            logger.info(`Index.js: No UGC codes defined in parser_config.allowed_ugc_codes or list is empty. Skipping UGC filtering for alert ID ${id}.`);
+        }
+        // End of UGC Filtering Logic for 'alert' category
         
         if (parsedData && parsedData.event) {  
             logger.info(`Raw event name: "${parsedData.event}"`);
@@ -173,20 +187,6 @@ const handleIncomingMessage = async ({ rawText, id, stanza }) => {
     }
 
     if (parsedData) {
-        // UGC Filtering Logic using parser_config.js
-        if (definitions.allowed_ugc_codes && definitions.allowed_ugc_codes.length > 0) {
-            // parsedData.ugc is the object { zones: [...] } or null, which is what shouldProcessUgc expects
-            if (!definitions.shouldProcessUgc(parsedData.ugc)) {
-                const messageUgcZonesText = parsedData.ugc && parsedData.ugc.zones && parsedData.ugc.zones.length > 0 ? parsedData.ugc.zones.join(', ') : 'none';
-                logger.info(`Index.js: Message ID ${id} filtered out by UGC. Alert Zones: [${messageUgcZonesText}]. Allowed Config Zones: [${definitions.allowed_ugc_codes.join(', ')}]. Not sending to webhook.`);
-                return; // Stop processing this message
-            }
-            const messageUgcZonesText = parsedData.ugc && parsedData.ugc.zones && parsedData.ugc.zones.length > 0 ? parsedData.ugc.zones.join(', ') : 'none';
-            logger.info(`Index.js: Message ID ${id} matched UGC filter. Alert Zones: [${messageUgcZonesText}]. Proceeding.`);
-        } else {
-            logger.info(`Index.js: No UGC codes defined in parser_config.allowed_ugc_codes or list is empty. Skipping UGC filtering for message ID ${id}.`);
-        }
-
         const webhookUrl = process.env.WEBHOOK_URL;
         if (!webhookUrl) {
             logger.error("WEBHOOK_URL is not defined in .env file. Cannot send data.");
