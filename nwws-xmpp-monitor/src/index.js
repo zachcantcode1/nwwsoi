@@ -153,6 +153,18 @@ const handleIncomingMessage = async ({ rawText, id, stanza }) => {
                 logger.info(`Index.js: Skipping Local Storm Report ID ${id} because summary is 'Rain'.`);
                 return;
             }
+
+            // LSR Issuing Office Filtering
+            if (definitions.allowed_lsr_issuing_offices && definitions.allowed_lsr_issuing_offices.length > 0) {
+                if (!definitions.shouldProcessLsrByOffice(parsedData.issuingOffice)) {
+                    logger.info(`Index.js: Message ID ${id} (Storm Report) filtered out by Issuing Office. Office: [${parsedData.issuingOffice || 'N/A'}]. Allowed Offices: [${definitions.allowed_lsr_issuing_offices.join(', ')}]. Not processing further.`);
+                    return; // Stop processing this storm report
+                }
+                logger.info(`Index.js: Message ID ${id} (Storm Report) matched Issuing Office filter. Office: [${parsedData.issuingOffice}]. Proceeding.`);
+            } else {
+                logger.info(`Index.js: No LSR Issuing Offices defined in parser_config.allowed_lsr_issuing_offices or list is empty. Skipping office filtering for storm report ID ${id}.`);
+            }
+            // End of LSR Issuing Office Filtering
             parsedData.messageType = 'storm_report'; // Add messageType for storm reports
             try {
                 // Sanitize ID for use in filename (replace non-alphanumeric characters except ., _, -)

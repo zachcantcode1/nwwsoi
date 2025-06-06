@@ -79,5 +79,28 @@ export default {
       return false; 
     }
     return parsedUgc.zones.some(zone => this.allowed_ugc_codes.includes(zone));
+  },
+
+  // Allowed LSR Issuing Offices
+  allowed_lsr_issuing_offices: [
+    "Paducah KY",
+    "Louisville KY"
+  ],
+
+  // LSR Issuing Office filtering method
+  shouldProcessLsrByOffice: function (issuingOffice) {
+    if (!issuingOffice) {
+      // If an LSR has no issuing office, and we are filtering, it shouldn't pass.
+      // If we are not filtering (list is empty), this function won't be the deciding factor.
+      return false; 
+    }
+    // If the allowed list is empty, this specific filter effectively allows all offices.
+    // The check for an empty list should ideally be done before calling this function in index.js,
+    // similar to how allowed_ugc_codes is handled.
+    // However, for robustness within this function:
+    if (this.allowed_lsr_issuing_offices.length === 0) {
+        return true; 
+    }
+    return this.allowed_lsr_issuing_offices.includes(issuingOffice);
   }
 };
