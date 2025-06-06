@@ -69,6 +69,9 @@ allowed_ugc_codes: [
 
   // UGC filtering method
   shouldProcessUgc: function (parsedUgc) {
+    console.log('[parser_config] Attempting UGC filter. Allowed UGCs:', JSON.stringify(this.allowed_ugc_codes));
+    console.log('[parser_config] Received parsedUgc for filtering:', JSON.stringify(parsedUgc, null, 2));
+
     if (!parsedUgc || !parsedUgc.zones || parsedUgc.zones.length === 0) {
       // If requireUgcFiltering is true and no UGCs, then false. If false, then true.
       // For now, let's assume if there are no UGCs in the alert, but we are filtering by UGC,
@@ -76,9 +79,16 @@ allowed_ugc_codes: [
       // This logic might need refinement based on whether an alert *must* have one of the allowed UGCs,
       // or if it should pass through if it has no UGCs at all.
       // Current assumption: if filtering is on, an alert MUST have an allowed UGC.
+      console.log('[parser_config] UGC data is invalid or no zones found. Filtering out.');
       return false; 
     }
-    return parsedUgc.zones.some(zone => this.allowed_ugc_codes.includes(zone));
+    const passes = parsedUgc.zones.some(zone => {
+      const included = this.allowed_ugc_codes.includes(zone);
+      console.log(`[parser_config] Checking zone "${zone}": in allowed list? ${included}`);
+      return included;
+    });
+    console.log('[parser_config] UGC filter decision (shouldProcessUgc):', passes);
+    return passes;
   },
 
   // Allowed LSR Issuing Offices
