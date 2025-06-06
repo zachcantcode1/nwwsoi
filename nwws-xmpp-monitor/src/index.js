@@ -27,7 +27,8 @@ if (logTarget === 'stdout') {
     const logsDir = path.join(__dirname, '..', 'logs');
     const transport = pino.transport({
         target: 'pino-roll',
-        options: {
+        options:
+        {
             file: path.join(logsDir, 'app.log'),
             frequency: 'daily',
             size: '20m',
@@ -259,29 +260,5 @@ async function shutdown() {
 process.on('SIGINT', shutdown);
 process.on('SIGTERM', shutdown);
 
-// ...existing code...
-    // Filter by UGC if configured
-    if (definitions.allowed_ugc_codes && definitions.allowed_ugc_codes.length > 0) {
-      console.log(`[index.js] UGC filtering is active. Checking product with UGC: ${JSON.stringify(parsedProduct.ugc, null, 2)}`);
-      if (!definitions.shouldProcessUgc(parsedProduct.ugc)) {
-        logger.debug(`Product ${parsedProduct.vtec_string || 'UNKNOWN'} filtered out by UGC.`);
-        console.log(`[index.js] Product ${parsedProduct.vtec_string || 'UNKNOWN'} filtered out by UGC.`);
-        return; // Skip this product
-      }
-      console.log(`[index.js] Product ${parsedProduct.vtec_string || 'UNKNOWN'} PASSED UGC filter.`);
-    } else {
-      console.log('[index.js] UGC filtering is NOT active (allowed_ugc_codes is empty or not defined).');
-    }
-
-    // Filter by LSR Issuing Office if configured
-    if (definitions.allowed_lsr_issuing_offices && definitions.allowed_lsr_issuing_offices.length > 0) {
-      console.log(`[index.js] LSR Issuing Office filtering is active. Checking office: ${parsedProduct.issuingOffice}`);
-      if (!definitions.shouldProcessLsrByOffice(parsedProduct.issuingOffice)) {
-        logger.debug(`Product ${parsedProduct.vtec_string || 'UNKNOWN'} filtered out by LSR Issuing Office.`);
-        console.log(`[index.js] Product ${parsedProduct.vtec_string || 'UNKNOWN'} filtered out by LSR Issuing Office.`);
-        return; // Skip this product
-      }
-      console.log(`[index.js] Product ${parsedProduct.vtec_string || 'UNKNOWN'} PASSED LSR Issuing Office filter.`);
-    } else {
-      console.log('[index.js] LSR Issuing Office filtering is NOT active (allowed_lsr_issuing_offices is empty or not defined).');
-    }
+// The misplaced filtering block that was here has been removed.
+// Product filtering is handled within the handleIncomingMessage function.
