@@ -60,12 +60,12 @@ export default {
   },
 
   // Allowed UGC codes
- // allowed_ugc_codes: [
- //     "KYC105", "KYC075", "KYC039", "KYC007", "KYC145", "KYC083", "KYC157",
- //     "KYC035", "KYC139", "KYC221", "KYC143", "KYC055", "KYC033", "KYC047",
- //     "KYC107", "KYC233", "KYC225", "KYC101", "KYC059", "KYC149", "KYC177",
- //     "KYC219", "KYC141", "KYC213", "KYC031", "KYC183", "KYC091", "KYC227"
- // ],
+allowed_ugc_codes: [
+  "KYC105", "KYC075", "KYC039", "KYC007", "KYC145", "KYC083", "KYC157",
+  "KYC035", "KYC139", "KYC221", "KYC143", "KYC055", "KYC033", "KYC047",
+  "KYC107", "KYC233", "KYC225", "KYC101", "KYC059", "KYC149", "KYC177",
+  "KYC219", "KYC141", "KYC213", "KYC031", "KYC183", "KYC091", "KYC227"
+],
 
   // UGC filtering method
   shouldProcessUgc: function (parsedUgc) {
