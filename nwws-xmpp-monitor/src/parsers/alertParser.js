@@ -14,6 +14,7 @@ function parseCapAlertDetails(capAlertElement, logger) {
 
     const details = {};
     details.capPolygons = []; // Initialize for storing polygon strings
+    details.capUgcCodes = []; // Initialize for storing UGC codes from CAP XML
     // Heuristic: if no getChild method, assume it's an xml2js plain object
     const isXmlJs = typeof capAlertElement.getChild !== 'function';
 
@@ -86,6 +87,21 @@ function parseCapAlertDetails(capAlertElement, logger) {
 
                 if (!details.areaDesc && areaData.areaDesc) details.areaDesc = areaData.areaDesc; // Take first areaDesc
                 
+                // Extract UGCs from geocode elements
+                const geocodeBlocks = Array.isArray(areaData.geocode) ? areaData.geocode : [areaData.geocode].filter(Boolean);
+                geocodeBlocks.forEach(geo => {
+                    if (geo && geo.valueName && geo.value && (geo.valueName.toUpperCase() === 'UGC' || geo.valueName.toUpperCase() === 'FIPS6')) {
+                        // Split value in case multiple codes are space-separated (though typically one per geocode)
+                        const codes = geo.value.split(/\\s+/);
+                        codes.forEach(code => {
+                            if (code && !details.capUgcCodes.includes(code)) {
+                                details.capUgcCodes.push(code);
+                                logger.debug(`AlertParser (xml2js): Added UGC '${code}' from geocode (${geo.valueName}).`);
+                            }
+                        });
+                    }
+                });
+
                 const polygonStrings = Array.isArray(areaData.polygon) ? areaData.polygon : [areaData.polygon].filter(Boolean);
                 if (polygonStrings.length === 0) {
                     logger.debug(`AlertParser (xml2js): Area block ${areaIndex + 1} (info ${index+1}) has no 'polygon' strings.`);
@@ -109,6 +125,16 @@ function parseCapAlertDetails(capAlertElement, logger) {
                 parametersRaw.forEach(p => {
                     if (p && p.valueName && p.value) {
                         details.parameters.push({ valueName: p.valueName, value: p.value });
+                        // Check for UGCs in parameters
+                        if (p.valueName.toUpperCase() === 'UGC') {
+                            const codes = p.value.split(/\\s+/);
+                            codes.forEach(code => {
+                                if (code && !details.capUgcCodes.includes(code)) {
+                                    details.capUgcCodes.push(code);
+                                    logger.debug(`AlertParser (xml2js): Added UGC '${code}' from parameter (${p.valueName}).`);
+                                }
+                            });
+                        }
                     }
                 });
             } else if (!details.parameters) {
@@ -157,6 +183,22 @@ function parseCapAlertDetails(capAlertElement, logger) {
                 if (!areaElement) return;
                 if (!details.areaDesc && areaElement.getChildText('areaDesc')) details.areaDesc = areaElement.getChildText('areaDesc'); // Take first areaDesc
                 
+                // Extract UGCs from geocode elements for @xmpp/xml
+                const geocodeElements = areaElement.getChildren('geocode');
+                geocodeElements.forEach(geoElement => {
+                    const valueName = geoElement.getChildText('valueName');
+                    const value = geoElement.getChildText('value');
+                    if (valueName && value && (valueName.toUpperCase() === 'UGC' || valueName.toUpperCase() === 'FIPS6')) {
+                        const codes = value.split(/\\s+/);
+                        codes.forEach(code => {
+                            if (code && !details.capUgcCodes.includes(code)) {
+                                details.capUgcCodes.push(code);
+                                logger.debug(`AlertParser (@xmpp/xml): Added UGC '${code}' from geocode (${valueName}).`);
+                            }
+                        });
+                    }
+                });
+
                 const polygonElements = areaElement.getChildren('polygon');
                 polygonElements.forEach(polyElement => {
                     const polyStr = polyElement.getText();
@@ -173,6 +215,16 @@ function parseCapAlertDetails(capAlertElement, logger) {
                 const value = p.getChildText('value');
                 if (valueName && value) {
                     details.parameters.push({ valueName, value });
+                    // Check for UGCs in parameters for @xmpp/xml
+                    if (valueName.toUpperCase() === 'UGC') {
+                        const codes = value.split(/\\s+/);
+                        codes.forEach(code => {
+                            if (code && !details.capUgcCodes.includes(code)) {
+                                details.capUgcCodes.push(code);
+                                logger.debug(`AlertParser (@xmpp/xml): Added UGC '${code}' from parameter (${valueName}).`);
+                            }
+                        });
+                    }
                 }
             });
         });
@@ -193,27 +245,41 @@ export function parseAlert(rawText, id, capAlertElement, logger) {
         const vtec = vtecParser.getVtec(rawText);
         if (vtec) alertData.vtec = vtec;
 
-        const ugc = ugcParser.getUgc(rawText);
-        if (ugc) alertData.ugc = ugc;
+        // Prioritize UGC from CAP XML if available
+        const capDetails = parseCapAlertDetails(capAlertElement, logger);
+        if (capDetails.capUgcCodes && capDetails.capUgcCodes.length > 0) {
+            alertData.ugc = { zones: capDetails.capUgcCodes, full_ugc_string: capDetails.capUgcCodes.join(' ') }; // Adapt as needed
+            logger.info(`AlertParser: Populated UGC from CAP XML: ${capDetails.capUgcCodes.join(', ')}`);
+        } else {
+            // Fallback to raw text parsing if no UGCs found in CAP XML
+            const ugcFromRaw = ugcParser.getUgc(rawText);
+            if (ugcFromRaw) {
+                alertData.ugc = ugcFromRaw;
+                logger.info(`AlertParser: Populated UGC from raw text parser.`);
+            } else {
+                 logger.info(`AlertParser: No UGC found in CAP XML or by raw text parser.`);
+            }
+        }
+        
+        // Merge other details from capDetails into alertData
+        // Avoid overwriting id, source, raw_product_text, vtec, ugc
+        for (const key in capDetails) {
+            if (key !== 'capUgcCodes' && capDetails.hasOwnProperty(key) && !alertData.hasOwnProperty(key)) {
+                alertData[key] = capDetails[key];
+            }
+        }
+
 
         alertData.issuingOffice = rawParser.getOfficeName(rawText);
         
-        // CAP XML specific parsing
-        // capAlertElement is now either an @xmpp/xml Element or the JS object from xml2js
-        const capDetails = parseCapAlertDetails(capAlertElement, logger);
-        alertData.cap = capDetails;
+        // CAP XML specific parsing (original call to parseCapAlertDetails is now handled above for UGC)
+        // const capDetails = parseCapAlertDetails(capAlertElement, logger); // Already called
+        // Object.assign(alertData, capDetails); // Merged above selectively
 
-        // Skip if message type is Cancel or Update
-        if (alertData.cap && alertData.cap.msgType) {
-            const msgTypeLower = alertData.cap.msgType.toLowerCase();
-            if (msgTypeLower === 'cancel') {
-                logger.info(`AlertParser: Skipping alert ID ${id} because it's a 'Cancel' message.`);
-                return null;
-            }
-            if (msgTypeLower === 'update') {
-                logger.info(`AlertParser: Skipping alert ID ${id} because it's an 'Update' message.`);
-                return null;
-            }
+        // If it's an 'Actual' message and type is 'Cancel', we might not need to process further
+        if (alertData.cap && alertData.cap.msgType && alertData.cap.msgType.toLowerCase() === 'cancel') {
+            logger.info(`AlertParser: Alert ID ${id} is a 'Cancel' message. Skipping further processing.`);
+            return null;
         }
 
         // Initialize geometry as null
